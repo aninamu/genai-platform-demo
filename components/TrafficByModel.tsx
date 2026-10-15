@@ -12,8 +12,8 @@ const SOURCES: { id: UsageSource; label: string }[] = [
   { id: "live", label: "Live only" },
 ];
 
-function usd(value: number | null, digits = 4): string {
-  return value === null ? "n/a" : `$${value.toFixed(digits)}`;
+function usd(value: number | null): string {
+  return value === null ? "n/a" : `$${value.toFixed(4)}`;
 }
 
 export function TrafficByModel({
@@ -86,11 +86,7 @@ export function TrafficByModel({
             className="rounded border border-white/20 px-3 py-1 text-xs text-cyan-100 hover:bg-white/10 disabled:opacity-50"
             onClick={() => void seed()}
           >
-            {seeding
-              ? "Seeding…"
-              : summary?.sampleRequests
-                ? "Reset sample history"
-                : "Load sample history"}
+            {seeding ? "Seeding…" : "Load / reset sample history"}
           </button>
         </div>
       </div>
@@ -159,7 +155,7 @@ export function TrafficByModel({
                       </span>
                     </div>
                   </td>
-                  <td className="px-2 py-2">{usd(m.totalCost, 2)}</td>
+                  <td className="px-2 py-2">{usd(m.totalCost)}</td>
                   <td className="px-2 py-2">
                     {usd(m.avgCostPerRequest)}
                     {m.unpricedRequests > 0 && (
@@ -180,7 +176,7 @@ export function TrafficByModel({
               <td className="px-2 py-2">Total</td>
               <td className="px-2 py-2">{summary.totalRequests}</td>
               <td className="px-2 py-2">100%</td>
-              <td className="px-2 py-2">{usd(summary.totalCost, 2)}</td>
+              <td className="px-2 py-2">{usd(summary.totalCost)}</td>
               <td colSpan={2} />
             </tr>
           </tfoot>
