@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { WorkspaceView } from "@/components/WorkspaceView";
-import { WorkspaceAuthGate } from "@/components/WorkspaceAuthGate";
+import { WorkspacePageClient } from "@/components/WorkspacePageClient";
 import { getSeedDocuments, getWorkflows, getWorkspace } from "@/lib/seed";
 
 export default async function WorkspacePage({
@@ -16,15 +15,10 @@ export default async function WorkspacePage({
   const workflows = getWorkflows().filter((w) => w.workspaceId === workspace.id);
 
   return (
-    <WorkspaceAuthGate workspace={workspace} fallbackRedirect="/">
-      {(role) => (
-        <WorkspaceView
-          workspace={workspace}
-          seedDocs={seedDocs}
-          workflows={workflows}
-          caller={role}
-        />
-      )}
-    </WorkspaceAuthGate>
+    <WorkspacePageClient
+      workspace={workspace}
+      seedDocs={seedDocs}
+      workflows={workflows}
+    />
   );
 }
