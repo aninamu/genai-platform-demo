@@ -26,6 +26,8 @@ function resolveBaseUrl(baseUrl?: string): string {
   return process.env.GATEWAY_BASE_URL ?? "http://127.0.0.1:3000";
 }
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 export function createGatewayClient(options: GatewayClientOptions = {}) {
   const baseUrl = resolveBaseUrl(options.baseUrl);
   const fetchImpl = options.fetchImpl ?? fetch;
@@ -43,6 +45,7 @@ export function createGatewayClient(options: GatewayClientOptions = {}) {
         method: "POST",
         headers,
         body: JSON.stringify(request),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
 
       if (!res.ok) {
@@ -62,7 +65,9 @@ export function createGatewayClient(options: GatewayClientOptions = {}) {
       if (params?.limit) qs.set("limit", String(params.limit));
       const suffix = qs.toString() ? `?${qs}` : "";
 
-      const res = await fetchImpl(`${baseUrl}/api/v1/traces${suffix}`);
+      const res = await fetchImpl(`${baseUrl}/api/v1/traces${suffix}`, {
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
       if (!res.ok) {
         const problem = (await res.json()) as ProblemDetails;
         throw new GatewayClientError(problem);

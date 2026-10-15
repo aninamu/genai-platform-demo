@@ -5,28 +5,24 @@ import type { GatewayTrace, TraceListResult } from "./contracts";
 const DEFAULT_DIR = path.join(process.cwd(), ".data");
 const DEFAULT_FILE = path.join(DEFAULT_DIR, "traces.json");
 
-let memoryTraces: GatewayTrace[] | null = null;
 let overridePath: string | null = null;
 
 function storePath(): string {
   return overridePath ?? DEFAULT_FILE;
 }
 
+// Always read from disk: Next.js and the MCP server are separate processes sharing this file.
 function ensureLoaded(): GatewayTrace[] {
-  if (memoryTraces) return memoryTraces;
-
   const file = storePath();
   try {
     if (fs.existsSync(file)) {
       const raw = fs.readFileSync(file, "utf8");
-      memoryTraces = JSON.parse(raw) as GatewayTrace[];
-    } else {
-      memoryTraces = [];
+      return JSON.parse(raw) as GatewayTrace[];
     }
   } catch {
-    memoryTraces = [];
+    // fall through to empty store
   }
-  return memoryTraces;
+  return [];
 }
 
 function persist(traces: GatewayTrace[]): void {
@@ -84,14 +80,12 @@ export function findTraceByIdempotencyKey(
   );
 }
 
-/** Test helper: point the store at a temp file and clear memory. */
+/** Test helper: point the store at a temp file. */
 export function setTraceStorePathForTests(filePath: string): void {
   overridePath = filePath;
-  memoryTraces = null;
 }
 
 export function resetTraceStoreForTests(): void {
-  memoryTraces = [];
   if (overridePath) {
     try {
       fs.rmSync(overridePath, { force: true });

@@ -6,7 +6,7 @@ import type {
 } from "./contracts";
 import { runMockModel, streamMockModel } from "./mock-model";
 import { calculateCost } from "./pricing";
-import { appendTrace, listTraces } from "./trace-store";
+import { appendTrace, findTraceByIdempotencyKey } from "./trace-store";
 
 function buildTrace(
   request: GatewayRequest,
@@ -39,12 +39,7 @@ function buildTrace(
 }
 
 function findIdempotent(key: string): GatewayResponse | null {
-  const { data } = listTraces({ limit: 100 });
-  const hit = data.find(
-    (t) =>
-      t.id === `idem-${key}` ||
-      (t as GatewayTrace & { idempotencyKey?: string }).idempotencyKey === key,
-  );
+  const hit = findTraceByIdempotencyKey(key);
   if (!hit) return null;
   return {
     output: hit.output,

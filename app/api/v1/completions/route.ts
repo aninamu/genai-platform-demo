@@ -4,6 +4,8 @@ import { problemResponse } from "@/lib/api/problem";
 
 export const runtime = "nodejs";
 
+// Public by design: this demo has no server-side auth (mock roles live in browser
+// localStorage), so there is no session to verify. Do not expose beyond local demos.
 export async function POST(request: Request) {
   const instance = "/api/v1/completions";
 

@@ -3,6 +3,8 @@ import { problemResponse } from "@/lib/api/problem";
 
 export const runtime = "nodejs";
 
+// Public by design: this demo has no server-side auth (mock roles live in browser
+// localStorage), so there is no session to verify. Do not expose beyond local demos.
 export async function GET(request: Request) {
   const instance = "/api/v1/traces";
   const url = new URL(request.url);

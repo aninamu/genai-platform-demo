@@ -27,6 +27,7 @@ function snippetAround(content: string, keyword: string): string {
 
 function matchUploadedDocument(
   request: GatewayRequest,
+  allowContentMatch: boolean,
 ): { output: string; citations: GatewayCitation[] } | null {
   const docs = request.documents ?? [];
   if (docs.length === 0) return null;
@@ -37,7 +38,7 @@ function matchUploadedDocument(
       .toLowerCase()
       .split(/\W+/)
       .filter((w) => w.length > 4);
-    const hit = words.find((w) => input.includes(w));
+    const hit = allowContentMatch && words.find((w) => input.includes(w));
     if (hit || input.includes(doc.name.toLowerCase().replace(/\.\w+$/, ""))) {
       const snippet = doc.content.slice(0, 200).trim();
       return {
@@ -129,16 +130,6 @@ export async function runMockModel(
     };
   }
 
-  const uploaded = matchUploadedDocument(request);
-  if (uploaded) {
-    return {
-      output: uploaded.output,
-      inputTokens: estimateTokens(request.input),
-      outputTokens: estimateTokens(uploaded.output),
-      citations: uploaded.citations,
-    };
-  }
-
   const responses = getScriptedResponses().filter(
     (r) => !request.workspaceId || r.workspaceId === request.workspaceId,
   );
@@ -155,6 +146,17 @@ export async function runMockModel(
       bestScore = score;
       best = response;
     }
+  }
+
+  // Loose content-word matching only applies when no scripted answer matched.
+  const uploaded = matchUploadedDocument(request, bestScore <= 0);
+  if (uploaded) {
+    return {
+      output: uploaded.output,
+      inputTokens: estimateTokens(request.input),
+      outputTokens: estimateTokens(uploaded.output),
+      citations: uploaded.citations,
+    };
   }
 
   const fallback =
