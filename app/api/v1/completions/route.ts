@@ -1,4 +1,4 @@
-import { executePrompt } from "@/lib/gateway";
+import { executePrompt, PROVIDER_NOT_CONFIGURED_TYPE } from "@/lib/gateway";
 import type { GatewayRequest } from "@/lib/gateway/contracts";
 import { problemResponse } from "@/lib/api/problem";
 
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
   if (result.status === "error") {
     return problemResponse(
-      500,
+      result.error?.type === PROVIDER_NOT_CONFIGURED_TYPE ? 503 : 500,
       result.error?.title ?? "Gateway Error",
       result.error?.detail ?? "Prompt execution failed",
       instance,

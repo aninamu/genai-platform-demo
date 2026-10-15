@@ -29,6 +29,7 @@ export function PresetWorkflow({
     outputTokens: number;
     cost: number | null;
     correlationId: string;
+    simulated: boolean;
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +65,7 @@ export function PresetWorkflow({
           outputTokens: result.outputTokens,
           cost: result.cost,
           correlationId: result.correlationId,
+          simulated: result.simulated,
         });
       }
     } catch (err) {
@@ -152,8 +154,17 @@ export function PresetWorkflow({
       {output && (
         <div className="mt-4 rounded border border-white/10 bg-[#071628] p-3">
           <div className="mb-2 flex flex-wrap gap-2">
-            <MockBadge label="Scripted output" />
-            <MockBadge label="Simulated tokens/cost" />
+            {meta?.simulated === false ? (
+              <MockBadge
+                label="Live xAI output · real tokens/cost"
+                className="border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+              />
+            ) : (
+              <>
+                <MockBadge label="Scripted output" />
+                <MockBadge label="Simulated tokens/cost" />
+              </>
+            )}
           </div>
           <pre className="whitespace-pre-wrap text-sm text-cyan-50">{output}</pre>
           {meta && (
@@ -163,13 +174,13 @@ export function PresetWorkflow({
                 <dd className="text-cyan-100">{meta.model}</dd>
               </div>
               <div>
-                <dt>Tokens (sim)</dt>
+                <dt>Tokens{meta.simulated ? " (sim)" : ""}</dt>
                 <dd className="text-cyan-100">
                   {meta.inputTokens} → {meta.outputTokens}
                 </dd>
               </div>
               <div>
-                <dt>Cost (sim)</dt>
+                <dt>Cost{meta.simulated ? " (sim)" : ""}</dt>
                 <dd className="text-cyan-100">
                   {meta.cost === null ? "n/a" : `$${meta.cost.toFixed(6)}`}
                 </dd>

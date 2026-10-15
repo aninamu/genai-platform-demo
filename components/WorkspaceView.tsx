@@ -16,8 +16,10 @@ import type {
   WorkflowDefinition,
   Workspace,
 } from "@/lib/types";
+import { getModelOption, isLiveModel } from "@/lib/models";
 import { DocumentLibrary } from "./DocumentLibrary";
 import { MockBadge } from "./MockBadge";
+import { ModelPicker } from "./ModelPicker";
 import { PresetWorkflow } from "./PresetWorkflow";
 import { RetrievalPanel } from "./RetrievalPanel";
 
@@ -39,6 +41,7 @@ export function WorkspaceView({
   const [busy, setBusy] = useState(false);
   const [citations, setCitations] = useState<GatewayCitation[]>([]);
   const [latency, setLatency] = useState<number | undefined>();
+  const [model, setModel] = useState(workspace.model);
   const client = useMemo(() => createGatewayClient(), []);
 
   useEffect(() => {
@@ -68,7 +71,7 @@ export function WorkspaceView({
     try {
       const result = await client.complete({
         input: text,
-        model: workspace.model,
+        model,
         caller,
         workspaceId: workspace.id,
         documents: uploads.map((u) => ({
@@ -92,7 +95,7 @@ export function WorkspaceView({
         inputTokens: result.inputTokens,
         outputTokens: result.outputTokens,
         cost: result.cost,
-        simulated: true,
+        simulated: result.simulated,
       };
       const withAssistant = [...next, assistant];
       setMessages(withAssistant);
@@ -119,9 +122,20 @@ export function WorkspaceView({
         <div>
           <h1 className="text-2xl font-semibold text-white">{workspace.name}</h1>
           <p className="mt-1 text-sm text-cyan-100/70">{workspace.description}</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <MockBadge label={`Model: ${workspace.model} (simulated)`} />
-            <MockBadge label="Bedrock (simulated)" />
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <ModelPicker value={model} onChange={setModel} />
+            <MockBadge
+              label={
+                isLiveModel(model)
+                  ? "xAI API (live, real tokens/cost)"
+                  : "Bedrock (simulated)"
+              }
+              className={
+                isLiveModel(model)
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                  : ""
+              }
+            />
           </div>
         </div>
         <div className="flex rounded border border-white/15 p-1 text-sm">
@@ -179,18 +193,28 @@ export function WorkspaceView({
                       : "mr-8 bg-[#071628] text-cyan-50"
                   }`}
                 >
-                  {m.role === "assistant" && (
+                  {m.role === "assistant" && m.model && (
                     <div className="mb-2 flex flex-wrap gap-2">
-                      <MockBadge label="Scripted response" />
-                      {typeof m.cost === "number" && (
-                        <MockBadge label="Simulated tokens/cost" />
+                      {m.simulated === false ? (
+                        <MockBadge
+                          label={`Live ${getModelOption(m.model)?.label ?? m.model}`}
+                          className="border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                        />
+                      ) : (
+                        <>
+                          <MockBadge label="Scripted response" />
+                          {typeof m.cost === "number" && (
+                            <MockBadge label="Simulated tokens/cost" />
+                          )}
+                        </>
                       )}
                     </div>
                   )}
                   <pre className="whitespace-pre-wrap font-sans">{m.content}</pre>
                   {m.role === "assistant" && m.model && (
                     <p className="mt-2 text-[11px] text-cyan-200/50">
-                      {m.model} · {m.inputTokens}→{m.outputTokens} tok (sim) ·{" "}
+                      {m.model} · {m.inputTokens}→{m.outputTokens} tok
+                      {m.simulated === false ? "" : " (sim)"} ·{" "}
                       {m.cost === null || m.cost === undefined
                         ? "cost n/a"
                         : `$${m.cost.toFixed(6)}`}{" "}
@@ -235,7 +259,7 @@ export function WorkspaceView({
               <PresetWorkflow
                 key={wf.id}
                 workflow={wf}
-                model={workspace.model}
+                model={model}
                 caller={caller}
               />
             ))

@@ -43,7 +43,10 @@ export interface GatewayResponse {
   latencyMs: number;
   status: GatewayStatus;
   correlationId: string;
-  simulated: true;
+  /** False only for real provider calls (Grok via xAI). */
+  simulated: boolean;
+  /** Upstream model id when it differs from the gateway model id, e.g. "grok-4.7". */
+  providerModel?: string;
   citations?: GatewayCitation[];
   error?: {
     type: string;
@@ -70,7 +73,10 @@ export interface GatewayTrace {
   currency: string;
   latencyMs: number;
   status: GatewayStatus;
-  simulated: true;
+  simulated: boolean;
+  providerModel?: string;
+  /** Seeded sample history, not produced by a real or scripted request. */
+  sample?: boolean;
   citations?: GatewayCitation[];
   error?: GatewayResponse["error"];
 }
@@ -90,4 +96,28 @@ export interface ProblemDetails {
   detail: string;
   instance: string;
   traceId: string;
+}
+
+export interface ModelUsage {
+  model: string;
+  requests: number;
+  /** Fraction of all requests in the selection, 0–1. */
+  share: number;
+  errors: number;
+  totalTokens: number;
+  totalCost: number;
+  avgCostPerRequest: number | null;
+  /** Requests whose cost was null (unknown pricing or failed before usage). */
+  unpricedRequests: number;
+  avgLatencyMs: number;
+}
+
+export type UsageSource = "all" | "live" | "sample";
+
+export interface UsageSummary {
+  source: UsageSource;
+  totalRequests: number;
+  totalCost: number;
+  sampleRequests: number;
+  byModel: ModelUsage[];
 }

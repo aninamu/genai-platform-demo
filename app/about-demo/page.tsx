@@ -10,6 +10,20 @@ const SEAMS = [
     replaceWith: "Bedrock (or other) adapter behind executePrompt()",
   },
   {
+    name: "Grok model adapter",
+    status: "live",
+    current:
+      "lib/gateway/xai-model.ts calls the real xAI API (XAI_API_KEY) and traces real tokens and xAI-priced cost.",
+    replaceWith: "Already real; model id configurable via XAI_MODEL",
+  },
+  {
+    name: "Traffic history",
+    status: "sample",
+    current:
+      "Traces page can seed 500 labeled sample traces (Opus default, Grok 3.6%).",
+    replaceWith: "Production gateway trace history",
+  },
+  {
     name: "Documents / retrieval",
     status: "mock",
     current:
@@ -44,9 +58,16 @@ export default function AboutDemoPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-white">What is simulated</h2>
         <ul className="list-disc space-y-1 pl-5 text-sm text-cyan-100/80">
-          <li>All model answers and workflow outputs (scripted)</li>
+          <li>
+            Claude model answers and workflow outputs (scripted). Grok is the
+            exception: it makes real xAI API calls when XAI_API_KEY is set.
+          </li>
+          <li>Seeded sample traffic history on the Traces page (labeled)</li>
           <li>Retrieval scores and latency (not NVIDIA NeMo)</li>
-          <li>Token counts and USD cost (pricing table {PRICING_TABLE_VERSION})</li>
+          <li>
+            Claude token counts and USD cost (pricing table {PRICING_TABLE_VERSION});
+            Grok uses real xAI usage and xAI list prices
+          </li>
           <li>SSO / roles (localStorage)</li>
           <li>Uploaded files (browser only)</li>
         </ul>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RequireAuth } from "@/components/RequireAuth";
 import { MockBadge } from "@/components/MockBadge";
+import { TrafficByModel } from "@/components/TrafficByModel";
 import { createGatewayClient } from "@/lib/gateway/client";
 import type { GatewayTrace } from "@/lib/gateway/contracts";
 
@@ -12,6 +13,7 @@ function TracesContent() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<GatewayTrace | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const load = useCallback(
     async (cursor?: string) => {
@@ -31,22 +33,27 @@ function TracesContent() {
     void load();
   }, [load]);
 
+  const refreshAll = useCallback(() => {
+    void load();
+    setRefreshKey((k) => k + 1);
+  }, [load]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-white">Gateway traces</h1>
           <p className="mt-1 text-sm text-cyan-100/70">
-            Read-only view of prompts routed through the mock gateway. Usage and
-            cost values are simulated.
+            Prompts routed through the gateway. Claude usage and cost are
+            simulated; Grok traces carry real xAI token counts and cost.
           </p>
         </div>
         <div className="flex gap-2">
-          <MockBadge label="Simulated tokens/cost" />
+          <MockBadge label="Simulated Claude tokens/cost" />
           <button
             type="button"
             className="rounded border border-white/20 px-3 py-1 text-xs text-cyan-100 hover:bg-white/10"
-            onClick={() => void load()}
+            onClick={refreshAll}
           >
             Refresh
           </button>
@@ -58,6 +65,12 @@ function TracesContent() {
           {error}
         </p>
       )}
+
+      <TrafficByModel
+        client={client}
+        refreshKey={refreshKey}
+        onSeeded={refreshAll}
+      />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
         <div className="overflow-hidden rounded-lg border border-white/10 bg-[#0d2240]">
@@ -90,7 +103,16 @@ function TracesContent() {
                       {new Date(t.createdAt).toLocaleString()}
                     </td>
                     <td className="px-3 py-2">{t.caller}</td>
-                    <td className="px-3 py-2 text-xs">{t.model}</td>
+                    <td className="px-3 py-2 text-xs">
+                      {t.model}
+                      {t.sample && <MockBadge label="Sample" className="ml-1" />}
+                      {!t.simulated && (
+                        <MockBadge
+                          label="Live"
+                          className="ml-1 border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                        />
+                      )}
+                    </td>
                     <td className="px-3 py-2">
                       {t.inputTokens}→{t.outputTokens}
                     </td>
@@ -118,7 +140,16 @@ function TracesContent() {
           {selected ? (
             <div className="space-y-3 text-sm">
               <div className="flex flex-wrap gap-2">
-                <MockBadge label="Simulated" />
+                {selected.sample ? (
+                  <MockBadge label="Sample history" />
+                ) : selected.simulated ? (
+                  <MockBadge label="Simulated" />
+                ) : (
+                  <MockBadge
+                    label={`Live xAI · ${selected.providerModel ?? selected.model}`}
+                    className="border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                  />
+                )}
                 <span className="text-xs text-cyan-200/60">
                   {selected.correlationId}
                 </span>
