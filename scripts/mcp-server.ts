@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+/**
+ * MCP stdio server exposing run_prompt and list_traces against the gateway.
+ * Run: pnpm mcp
+ */
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+import { executePrompt, listTraces } from "../lib/gateway";
+
+const server = new McpServer({
+  name: "nasdaq-genai-gateway",
+  version: "0.1.0",
+});
+
+server.tool(
+  "run_prompt",
+  "Execute a prompt through the GenAI gateway (mock). Tracks input, output, model, tokens, and cost.",
+  {
+    input: z.string().describe("Prompt text"),
+    model: z
+      .string()
+      .default("bedrock-claude-sonnet-sim")
+      .describe("Model id"),
+    caller: z.string().default("mcp").describe("Caller identity"),
+    workspaceId: z.string().optional(),
+    workflowId: z.string().optional(),
+  },
+  async ({ input, model, caller, workspaceId, workflowId }) => {
+    const result = await executePrompt({
+      input,
+      model,
+      caller,
+      workspaceId,
+      workflowId,
+    });
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  },
+);
+
+server.tool(
+  "list_traces",
+  "List gateway traces with simulated usage and cost.",
+  {
+    cursor: z.string().optional(),
+    limit: z.number().int().min(1).max(100).optional(),
+  },
+  async ({ cursor, limit }) => {
+    const result = listTraces({ cursor, limit });
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  },
+);
+
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

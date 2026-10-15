@@ -1,0 +1,129 @@
+[
+  {
+    "id": "eng-code-assist",
+    "workspaceId": "engineering",
+    "name": "Code assist",
+    "description": "Explain, refactor, or draft unit tests for pasted code.",
+    "source": {
+      "label": "BizTech / Reuters — engineering AI coding assistant",
+      "url": "https://biztechmagazine.com/article/2025/08/major-financial-services-firms-pursue-all-above-strategy-artificial-intelligence"
+    },
+    "inputs": [
+      {
+        "id": "mode",
+        "label": "Mode",
+        "type": "select",
+        "options": ["explain", "refactor", "unit-tests"],
+        "defaultValue": "explain"
+      },
+      {
+        "id": "code",
+        "label": "Code snippet",
+        "type": "textarea",
+        "defaultValue": "export function normalizeSymbol(raw: string) {\n  return raw.trim().toUpperCase();\n}"
+      }
+    ],
+    "promptTemplate": "Mode: {{mode}}\n\nCode:\n```\n{{code}}\n```\n\nProvide {{mode}} guidance for this Nasdaq engineering helper.",
+    "output": "### Scripted {{mode}} result\n\n```diff\n- export function normalizeSymbol(raw: string) {\n-   return raw.trim().toUpperCase();\n- }\n+ export function normalizeSymbol(raw: string): string {\n+   if (!raw) throw new Error('symbol required');\n+   return raw.trim().toUpperCase();\n+ }\n```\n\nSuggested unit test:\n\n```ts\nit('normalizes symbols', () => {\n  expect(normalizeSymbol(' aapl ')).toBe('AAPL');\n});\n```\n\n_This is a scripted demo output, not a live model response._"
+  },
+  {
+    "id": "sales-account-brief",
+    "workspaceId": "sales",
+    "name": "Account brief",
+    "description": "Synthesize fictional account notes, product details, and release notes.",
+    "source": {
+      "label": "BizTech — sales enablement / customer and product data",
+      "url": "https://biztechmagazine.com/article/2025/08/major-financial-services-firms-pursue-all-above-strategy-artificial-intelligence"
+    },
+    "inputs": [
+      {
+        "id": "account",
+        "label": "Account",
+        "type": "select",
+        "options": ["Northwind Capital", "Blue Harbor AM", "Summit Brokerage"],
+        "defaultValue": "Northwind Capital"
+      }
+    ],
+    "promptTemplate": "Create a one-page sales account brief for {{account}} using Market Data Feed X product facts and recent release notes.",
+    "output": "## Account brief: {{account}}\n\n**Opportunity:** Multi-asset desk evaluating Feed X for Asia + US coverage.\n**Priorities:** latency SLA, symbology quality, entitlement dashboard.\n**Risk:** previous corp-action delay complaint — cite release 2026.09 fix.\n**Ask:** pilot entitlement for 3 desks, 60-day success criteria.\n\n_Scripted demo brief synthesized from synthetic sample documents._"
+  },
+  {
+    "id": "support-ticket-assist",
+    "workspaceId": "support",
+    "name": "Ticket assist",
+    "description": "Summarize a ticket, draft a reply, and cite an escalation step.",
+    "source": {
+      "label": "BizTech — customer support interactions",
+      "url": "https://biztechmagazine.com/article/2025/08/major-financial-services-firms-pursue-all-above-strategy-artificial-intelligence"
+    },
+    "inputs": [
+      {
+        "id": "ticket",
+        "label": "Sample ticket",
+        "type": "select",
+        "options": [
+          "TKT-1042 delayed quotes in APAC",
+          "TKT-1109 reconnect loop on MDGW",
+          "TKT-1188 entitlement mismatch"
+        ],
+        "defaultValue": "TKT-1042 delayed quotes in APAC"
+      }
+    ],
+    "promptTemplate": "Assist on support ticket {{ticket}}: summarize, draft a client reply, and cite the escalation playbook step.",
+    "output": "## Ticket assist: {{ticket}}\n\n**Summary:** Client reports delayed APAC quotes; likely regional hop latency or entitlement route.\n\n**Suggested reply:**\n> Thank you for flagging this. We have opened a Sev-1 investigation for APAC quote delay on your entitlement and will share an ETA within 30 minutes. A bridge invite is available if you would like to join.\n\n**Escalation step:** Playbook §2 — notify bridge within 5 minutes for P1 connectivity/data delay.\n\n<button-sim>Insert into ticket (simulated)</button-sim>\n\n_Scripted demo output._"
+  },
+  {
+    "id": "dataops-reconciliation",
+    "workspaceId": "data-ops",
+    "name": "Reconciliation check",
+    "description": "Classify sample CSV breaks and propose SOP-backed fixes.",
+    "source": {
+      "label": "BizTech — data operations workflow automation",
+      "url": "https://biztechmagazine.com/article/2025/08/major-financial-services-firms-pursue-all-above-strategy-artificial-intelligence"
+    },
+    "inputs": [
+      {
+        "id": "sample",
+        "label": "Sample break set",
+        "type": "select",
+        "options": ["morning-batch-A.csv", "asia-open-B.csv"],
+        "defaultValue": "morning-batch-A.csv"
+      }
+    ],
+    "promptTemplate": "Run reconciliation classification for sample file {{sample}} using the reference-data SOP.",
+    "output": "## Reconciliation: {{sample}}\n\n| Break | Class | Proposed fix |\n| --- | --- | --- |\n| AAPL.O vs AAPL UW | Type-A | Remap MIC → composite |\n| 7203 JT lag | Type-B | Publish with quality flag |\n| XYZ CA pending | Type-C | Freeze until CA ID applied |\n\n**Quality before:** 1.8% unresolved  \n**Quality after (simulated):** 0.3% unresolved  \n**Time saved (simulated):** 42 minutes\n\n_Scripted demo output._"
+  },
+  {
+    "id": "marketing-blog-draft",
+    "workspaceId": "sales",
+    "name": "Marketing blog draft",
+    "description": "Generate an outline and draft with a compliance review notice.",
+    "source": {
+      "label": "Reuters — marketers exploring ChatGPT-style blog drafts",
+      "url": "https://www.reuters.com/technology/reuters-momentum-generative-ai-comes-nasdaq-winning-over-engineers-before-2023-07-11/"
+    },
+    "inputs": [
+      {
+        "id": "topic",
+        "label": "Topic",
+        "type": "text",
+        "defaultValue": "Why low-latency market data still matters"
+      },
+      {
+        "id": "audience",
+        "label": "Audience",
+        "type": "text",
+        "defaultValue": "buy-side technologists"
+      },
+      {
+        "id": "tone",
+        "label": "Tone",
+        "type": "select",
+        "options": ["professional", "conversational", "technical"],
+        "defaultValue": "professional"
+      }
+    ],
+    "promptTemplate": "Draft a {{tone}} blog outline and draft for audience {{audience}} on topic: {{topic}}.",
+    "output": "## Compliance review required\n\nThis draft must be reviewed by Marketing Compliance before publication.\n\n### Outline\n1. Latency is a workflow problem, not a vanity metric\n2. Where delayed ticks create downstream risk\n3. Practical checklist for desk technologists\n\n### Draft\nFor {{audience}}, {{topic}} remains a control issue. Teams that treat market data as plumbing miss the operational cost of delayed decisions. Focus on measurable reconnect SLAs, symbology quality, and entitlement clarity.\n\n_Scripted demo draft — not for external publication._"
+  }
+]
