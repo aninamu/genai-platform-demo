@@ -60,7 +60,7 @@
     "workspaceId": "support",
     "keywords": ["delayed feed", "draft a reply", "complaint"],
     "citationIds": ["support-playbook"],
-    "answer": "Suggested reply: thank the client, confirm the entitlement and region under investigation, share the current ETA, and offer a bridge invite. Do not speculate on root cause until engineering posts an update."
+    "answer": "Suggested reply: thank the client, confirm the entitlement and region under investigation, share the next update time, and offer a bridge invite. Do not speculate on root cause until engineering posts an update."
   },
   {
     "id": "dataops-symbology",
