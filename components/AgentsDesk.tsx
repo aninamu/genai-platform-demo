@@ -38,14 +38,12 @@ export function AgentsDesk() {
   const [approvals, setApprovals] = useState<Record<string, boolean>>(() =>
     typeof window === "undefined" ? {} : getAgentApprovals(),
   );
-  const [noticeSent, setNoticeSent] = useState(false);
   const client = useMemo(() => createGatewayClient(), []);
 
   function selectAgent(agent: AgentDefinition) {
     setSelectedId(agent.id);
     setModel(agent.defaultModel);
     setActiveStepId(null);
-    setNoticeSent(false);
   }
 
   async function runStep(agent: AgentDefinition, step: AgentStepDefinition) {
@@ -133,9 +131,6 @@ export function AgentsDesk() {
   function approve(agent: AgentDefinition) {
     setAgentApproved(agent.id, true);
     setApprovals((prev) => ({ ...prev, [agent.id]: true }));
-    if (agent.id === "corporate-action") {
-      setNoticeSent(true);
-    }
   }
 
   if (!selected) {
@@ -248,7 +243,7 @@ export function AgentsDesk() {
                       {approvals[selected.id] ? (
                         <MockBadge
                           label={
-                            selected.id === "corporate-action" && noticeSent
+                            selected.id === "corporate-action"
                               ? "Approved · notice marked sent (demo)"
                               : "Approved · playbook live"
                           }
@@ -309,8 +304,8 @@ export function AgentsDesk() {
                   ) : (
                     <MockBadge label="Scripted BDK response" />
                   )}
-                  {model === GROK_MODEL_ID &&
-                    activeResult.output.includes("X context") && (
+                  {activeResult.model === GROK_MODEL_ID &&
+                    /X (context )?\(Grok\)/.test(activeResult.output) && (
                       <MockBadge
                         label="X context included"
                         className="border-emerald-500/40 bg-emerald-500/10 text-emerald-200"

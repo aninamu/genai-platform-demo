@@ -65,7 +65,7 @@ function simulateRetrieval(
   citationIds: string[],
 ): GatewayCitation[] {
   const docs = getSeedDocuments(workspaceId);
-  const byId = new Map(docs.map((d) => [d.id, d]));
+  const byId = new Map(getSeedDocuments().map((d) => [d.id, d]));
   const citations: GatewayCitation[] = [];
 
   for (const id of citationIds) {
