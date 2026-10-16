@@ -1,7 +1,7 @@
 import {
-  DEFAULT_MODEL_ID,
   DEFAULT_XAI_MODEL,
   GROK_MODEL_ID,
+  SAMPLE_TRAFFIC_DEFAULT_MODEL_ID,
 } from "@/lib/models";
 import type { GatewayTrace } from "./contracts";
 import { calculateCost } from "./pricing";
@@ -9,14 +9,19 @@ import { replaceSampleTraces } from "./trace-store";
 
 export const SAMPLE_TRACE_COUNT = 500;
 
-/** Request counts per model. Opus is the default and dominates; Grok is 18/500 = 3.6%. */
+/** Request counts per model. Opus dominates sample history; Grok is 18/500 = 3.6%. */
 const MIX: {
   model: string;
   requests: number;
   latencyMs: [number, number];
   outputTokens: [number, number];
 }[] = [
-  { model: DEFAULT_MODEL_ID, requests: 350, latencyMs: [2800, 5800], outputTokens: [300, 900] },
+  {
+    model: SAMPLE_TRAFFIC_DEFAULT_MODEL_ID,
+    requests: 350,
+    latencyMs: [2800, 5800],
+    outputTokens: [300, 900],
+  },
   { model: "bedrock-claude-sonnet-sim", requests: 90, latencyMs: [1500, 3200], outputTokens: [250, 800] },
   { model: "bedrock-claude-haiku-sim", requests: 42, latencyMs: [500, 1200], outputTokens: [150, 500] },
   { model: GROK_MODEL_ID, requests: 18, latencyMs: [1200, 2700], outputTokens: [250, 800] },

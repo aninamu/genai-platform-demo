@@ -43,6 +43,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/" className="hover:text-white">
                 Workspaces
               </Link>
+              <Link href="/agents" className="hover:text-white">
+                Agents
+              </Link>
               {role === "admin" && (
                 <Link href="/traces" className="hover:text-white">
                   Traces

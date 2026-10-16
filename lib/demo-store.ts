@@ -1,10 +1,18 @@
 "use client";
 
-import type { ChatMessage, Role, UploadedDocument, WorkspaceId } from "./types";
+import type {
+  AgentMobileSession,
+  ChatMessage,
+  Role,
+  UploadedDocument,
+  WorkspaceId,
+} from "./types";
 
 const ROLE_KEY = "nasdaq-demo-role";
 const UPLOADS_KEY = "nasdaq-demo-uploads";
 const CHATS_KEY = "nasdaq-demo-chats";
+const AGENT_MOBILE_KEY = "nasdaq-demo-agent-mobile";
+const AGENT_APPROVALS_KEY = "nasdaq-demo-agent-approvals";
 
 function safeParse<T>(raw: string | null, fallback: T): T {
   if (!raw) return fallback;
@@ -62,4 +70,35 @@ export function setChat(workspaceId: WorkspaceId, messages: ChatMessage[]): void
   );
   all[workspaceId] = messages;
   localStorage.setItem(CHATS_KEY, JSON.stringify(all));
+}
+
+export function getAgentMobileSession(): AgentMobileSession | null {
+  if (typeof window === "undefined") return null;
+  return safeParse<AgentMobileSession | null>(
+    localStorage.getItem(AGENT_MOBILE_KEY),
+    null,
+  );
+}
+
+export function setAgentMobileSession(session: AgentMobileSession): void {
+  localStorage.setItem(AGENT_MOBILE_KEY, JSON.stringify(session));
+}
+
+export function clearAgentMobileSession(): void {
+  localStorage.removeItem(AGENT_MOBILE_KEY);
+}
+
+/** Map of agentId → approved (playbook / notice). */
+export function getAgentApprovals(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  return safeParse<Record<string, boolean>>(
+    localStorage.getItem(AGENT_APPROVALS_KEY),
+    {},
+  );
+}
+
+export function setAgentApproved(agentId: string, approved: boolean): void {
+  const all = getAgentApprovals();
+  all[agentId] = approved;
+  localStorage.setItem(AGENT_APPROVALS_KEY, JSON.stringify(all));
 }

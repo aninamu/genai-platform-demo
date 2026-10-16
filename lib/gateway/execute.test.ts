@@ -126,4 +126,69 @@ describe("executePrompt", () => {
     expect(res.status).toBe("success");
     expect(res.output).toMatch(/Scripted/i);
   });
+
+  it("runs a BDK agent step with caller, tokens, cost, and citations", async () => {
+    const res = await executePrompt({
+      input:
+        "Turn the Capital Access interview notes into a draft playbook for first-time issuer non-deal roadshows.",
+      model: "bedrock-claude-opus-sim",
+      caller: "bdk:capital-access",
+      workspaceId: "sales",
+      agentStepId: "capital-access-draft",
+    });
+
+    expect(res.status).toBe("success");
+    expect(res.output).toMatch(/Draft playbook/i);
+    expect(res.simulated).toBe(true);
+    expect(res.cost).not.toBeNull();
+    expect(res.totalTokens).toBeGreaterThan(0);
+    expect(res.citations?.length).toBeGreaterThan(0);
+    expect(res.citations?.[0].documentId).toBe("capital-access-notes");
+
+    const { data } = listTraces({ limit: 5 });
+    expect(data[0].caller).toBe("bdk:capital-access");
+    expect(data[0].agentStepId).toBe("capital-access-draft");
+    expect(data[0].cost).toBe(res.cost);
+  });
+
+  it("includes X context on Grok agent meeting-prep when falling back to scripted", async () => {
+    const prev = process.env.XAI_API_KEY;
+    delete process.env.XAI_API_KEY;
+
+    try {
+      const res = await executePrompt({
+        input: "Prepare a one-page meeting brief for Northwind Capital.",
+        model: "xai-grok",
+        caller: "bdk:meeting-prep",
+        workspaceId: "sales",
+        agentStepId: "meeting-prep-brief",
+      });
+
+      expect(res.status).toBe("success");
+      expect(res.simulated).toBe(true);
+      expect(res.cost).not.toBeNull();
+      expect(res.providerModel).toBeTruthy();
+      expect(res.output).toMatch(/X context \(Grok\)/i);
+      expect(res.citations?.some((c) => c.documentId === "meeting-prep-sources")).toBe(
+        true,
+      );
+    } finally {
+      if (prev === undefined) delete process.env.XAI_API_KEY;
+      else process.env.XAI_API_KEY = prev;
+    }
+  });
+
+  it("omits X context on Claude meeting-prep", async () => {
+    const res = await executePrompt({
+      input: "Prepare a one-page meeting brief for Northwind Capital.",
+      model: "bedrock-claude-opus-sim",
+      caller: "bdk:meeting-prep",
+      workspaceId: "sales",
+      agentStepId: "meeting-prep-brief",
+    });
+
+    expect(res.status).toBe("success");
+    expect(res.output).not.toMatch(/### X context \(Grok\)/);
+    expect(res.output).toMatch(/X context omitted/i);
+  });
 });

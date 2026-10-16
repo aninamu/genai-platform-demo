@@ -80,6 +80,43 @@ export interface ChatMessage {
   simulated?: boolean;
 }
 
+export interface AgentStepDefinition {
+  id: string;
+  label: string;
+  input: string;
+  output: string;
+  /** Grok-path scripted output that includes X context. */
+  outputWithX?: string;
+  citationIds: string[];
+  approvalGate?: boolean;
+  requiresPriorApproval?: boolean;
+}
+
+export interface AgentDefinition {
+  id: string;
+  name: string;
+  description: string;
+  caller: string;
+  workspaceId: WorkspaceId;
+  skillPath: string;
+  defaultModel: string;
+  supportsMobile: boolean;
+  steps: AgentStepDefinition[];
+}
+
+export interface AgentMobileSession {
+  agentId: string;
+  agentName: string;
+  stepId: string;
+  model: string;
+  output: string;
+  correlationId?: string;
+  cost?: number | null;
+  simulated?: boolean;
+  citations?: { documentId: string; title: string; snippet: string }[];
+  updatedAt: string;
+}
+
 export interface RetrievalHit {
   documentId: string;
   title: string;

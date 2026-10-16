@@ -59,6 +59,7 @@ export async function POST(request: Request) {
     caller: body.caller,
     workspaceId: body.workspaceId,
     workflowId: body.workflowId,
+    agentStepId: body.agentStepId,
     correlationId: body.correlationId,
     stream: body.stream,
     documents: body.documents,
