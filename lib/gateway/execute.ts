@@ -4,9 +4,14 @@ import type {
   GatewayResponse,
   GatewayTrace,
 } from "./contracts";
+import { GROK_MODEL_ID } from "@/lib/models";
 import { runMockModel, streamMockModel } from "./mock-model";
 import { calculateCost } from "./pricing";
 import { appendTrace, findTraceByIdempotencyKey } from "./trace-store";
+import { ProviderNotConfiguredError, runXaiModel } from "./xai-model";
+
+export const PROVIDER_NOT_CONFIGURED_TYPE =
+  "https://api.example.com/problems/provider-not-configured";
 
 function buildTrace(
   request: GatewayRequest,
@@ -31,7 +36,8 @@ function buildTrace(
     currency: response.currency,
     latencyMs: response.latencyMs,
     status: response.status,
-    simulated: true,
+    simulated: response.simulated,
+    ...(response.providerModel ? { providerModel: response.providerModel } : {}),
     citations: response.citations,
     error: response.error,
     ...(idempotencyKey ? { idempotencyKey } : {}),
@@ -53,7 +59,8 @@ function findIdempotent(key: string): GatewayResponse | null {
     latencyMs: hit.latencyMs,
     status: hit.status,
     correlationId: hit.correlationId,
-    simulated: true,
+    simulated: hit.simulated,
+    providerModel: hit.providerModel,
     citations: hit.citations,
     error: hit.error,
   };
@@ -64,6 +71,7 @@ export async function executePrompt(
 ): Promise<GatewayResponse> {
   const started = Date.now();
   const correlationId = request.correlationId ?? randomUUID();
+  const live = request.model === GROK_MODEL_ID;
 
   if (request.idempotencyKey) {
     const cached = findIdempotent(request.idempotencyKey);
@@ -75,8 +83,19 @@ export async function executePrompt(
     let inputTokens: number;
     let outputTokens: number;
     let citations: GatewayResponse["citations"];
+    let cachedInputTokens = 0;
+    let providerModel: string | undefined;
 
-    if (request.stream) {
+    if (live) {
+      // Upstream call is not streamed; the gateway returns the assembled output either way.
+      const result = await runXaiModel(request);
+      output = result.output;
+      inputTokens = result.inputTokens;
+      outputTokens = result.outputTokens;
+      cachedInputTokens = result.cachedInputTokens;
+      providerModel = result.providerModel;
+      citations = [];
+    } else if (request.stream) {
       const generator = streamMockModel(request);
       let assembled = "";
       let final = await generator.next();
@@ -97,7 +116,12 @@ export async function executePrompt(
       citations = result.citations;
     }
 
-    const pricing = calculateCost(request.model, inputTokens, outputTokens);
+    const pricing = calculateCost(
+      providerModel ?? request.model,
+      inputTokens,
+      outputTokens,
+      { cachedInputTokens },
+    );
     const response: GatewayResponse = {
       output,
       model: request.model,
@@ -110,7 +134,8 @@ export async function executePrompt(
       latencyMs: Date.now() - started,
       status: "success",
       correlationId,
-      simulated: true,
+      simulated: !live,
+      ...(providerModel ? { providerModel } : {}),
       citations,
     };
 
@@ -130,12 +155,19 @@ export async function executePrompt(
       latencyMs: Date.now() - started,
       status: "error",
       correlationId,
-      simulated: true,
-      error: {
-        type: "https://api.example.com/problems/gateway-error",
-        title: "Gateway Error",
-        detail,
-      },
+      simulated: !live,
+      error:
+        err instanceof ProviderNotConfiguredError
+          ? {
+              type: PROVIDER_NOT_CONFIGURED_TYPE,
+              title: "Model Unavailable",
+              detail,
+            }
+          : {
+              type: "https://api.example.com/problems/gateway-error",
+              title: "Gateway Error",
+              detail,
+            },
     };
     appendTrace(buildTrace(request, response, request.idempotencyKey));
     return response;

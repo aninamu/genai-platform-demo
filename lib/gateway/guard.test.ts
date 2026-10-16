@@ -20,7 +20,7 @@ function walk(dir: string, files: string[] = []): string[] {
 }
 
 describe("gateway architectural guard", () => {
-  it("no module outside lib/gateway imports mock-model", () => {
+  it("no module outside lib/gateway imports a model adapter", () => {
     const root = process.cwd();
     const offenders: string[] = [];
 
@@ -37,7 +37,10 @@ describe("gateway architectural guard", () => {
         /from\s+["'][^"']*mock-model["']/.test(text) ||
         /import\s*\(\s*["'][^"']*mock-model["']/.test(text) ||
         /\brunMockModel\b/.test(text) ||
-        /\bstreamMockModel\b/.test(text);
+        /\bstreamMockModel\b/.test(text) ||
+        /from\s+["'][^"']*xai-model["']/.test(text) ||
+        /\brunXaiModel\b/.test(text) ||
+        /api\.x\.ai/.test(text);
       if (importsMock) {
         offenders.push(rel);
       }

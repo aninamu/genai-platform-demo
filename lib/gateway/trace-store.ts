@@ -38,6 +38,19 @@ export function appendTrace(trace: GatewayTrace): GatewayTrace {
   return trace;
 }
 
+export function listAllTraces(): GatewayTrace[] {
+  return ensureLoaded();
+}
+
+/** Drops existing sample traces and stores `samples` after all live traces. */
+export function replaceSampleTraces(samples: GatewayTrace[]): void {
+  const live = ensureLoaded().filter((t) => !t.sample);
+  const sorted = [...samples].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt),
+  );
+  persist([...live, ...sorted]);
+}
+
 export function listTraces(options?: {
   cursor?: string | null;
   limit?: number;

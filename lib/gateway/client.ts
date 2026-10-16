@@ -1,8 +1,11 @@
+import type { ModelOption } from "@/lib/models";
 import type {
   GatewayRequest,
   GatewayResponse,
   ProblemDetails,
   TraceListResult,
+  UsageSource,
+  UsageSummary,
 } from "./contracts";
 
 export class GatewayClientError extends Error {
@@ -74,7 +77,47 @@ export function createGatewayClient(options: GatewayClientOptions = {}) {
       }
       return (await res.json()) as TraceListResult;
     },
+
+    async getUsage(source: UsageSource = "all"): Promise<UsageSummary> {
+      const res = await fetchImpl(`${baseUrl}/api/v1/usage?source=${source}`, {
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+      if (!res.ok) {
+        const problem = (await res.json()) as ProblemDetails;
+        throw new GatewayClientError(problem);
+      }
+      return (await res.json()) as UsageSummary;
+    },
+
+    async seedSampleTraffic(): Promise<{ inserted: number }> {
+      const res = await fetchImpl(`${baseUrl}/api/v1/traces/sample`, {
+        method: "POST",
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+      if (!res.ok) {
+        const problem = (await res.json()) as ProblemDetails;
+        throw new GatewayClientError(problem);
+      }
+      return (await res.json()) as { inserted: number };
+    },
+
+    async listModels(): Promise<ModelAvailability[]> {
+      const res = await fetchImpl(`${baseUrl}/api/v1/models`, {
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+      if (!res.ok) {
+        const problem = (await res.json()) as ProblemDetails;
+        throw new GatewayClientError(problem);
+      }
+      return ((await res.json()) as { data: ModelAvailability[] }).data;
+    },
   };
+}
+
+export interface ModelAvailability extends ModelOption {
+  available: boolean;
+  unavailableReason?: string;
+  providerModel?: string;
 }
 
 export type GatewayClient = ReturnType<typeof createGatewayClient>;

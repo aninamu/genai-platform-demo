@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * MCP stdio server exposing run_prompt and list_traces against the gateway.
+ * MCP stdio server exposing run_prompt, list_traces, and usage_by_model against the gateway.
  * Run: pnpm mcp
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { executePrompt, listTraces } from "../lib/gateway";
+import { executePrompt, getUsageSummary, listTraces } from "../lib/gateway";
+import { DEFAULT_MODEL_ID, MODEL_CATALOG } from "../lib/models";
 
 const server = new McpServer({
   name: "nasdaq-genai-gateway",
@@ -15,13 +16,13 @@ const server = new McpServer({
 
 server.tool(
   "run_prompt",
-  "Execute a prompt through the GenAI gateway (mock). Tracks input, output, model, tokens, and cost.",
+  "Execute a prompt through the GenAI gateway. Simulated Claude models are scripted; xai-grok calls the real xAI API. Tracks input, output, model, tokens, and cost.",
   {
     input: z.string().describe("Prompt text"),
     model: z
       .string()
-      .default("bedrock-claude-sonnet-sim")
-      .describe("Model id"),
+      .default(DEFAULT_MODEL_ID)
+      .describe(`Model id: ${MODEL_CATALOG.map((m) => m.id).join(", ")}`),
     caller: z.string().default("mcp").describe("Caller identity"),
     workspaceId: z.string().optional(),
     workflowId: z.string().optional(),
@@ -63,6 +64,25 @@ server.tool(
       ],
     };
   },
+);
+
+server.tool(
+  "usage_by_model",
+  "Traffic share, cost, and average latency per model, aggregated from gateway traces.",
+  {
+    source: z
+      .enum(["all", "live", "sample"])
+      .default("all")
+      .describe("Include live traces, seeded sample history, or both"),
+  },
+  async ({ source }) => ({
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(getUsageSummary(source), null, 2),
+      },
+    ],
+  }),
 );
 
 async function main() {
