@@ -1,17 +1,20 @@
-#!/usr/bin/env node
 /**
- * MCP stdio server exposing run_prompt, list_traces, and usage_by_model against the gateway.
- * Run: pnpm mcp
+ * MCP server exposing run_prompt, list_traces, and usage_by_model against the gateway.
+ * Importing this module does not start a transport; `pnpm mcp` runs it over stdio
+ * via scripts/mcp-stdio.ts.
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { executePrompt, getUsageSummary, listTracesForCaller } from "../lib/gateway";
+import {
+  executePrompt,
+  getUsageSummaryForCaller,
+  listTracesForCaller,
+} from "../lib/gateway";
 import { DEFAULT_MODEL_ID, MODEL_CATALOG } from "../lib/models";
 import { ALL_ROLES } from "../lib/permissions";
 import type { Role } from "../lib/types";
 
-const server = new McpServer({
+export const server = new McpServer({
   name: "nasdaq-genai-gateway",
   version: "0.1.0",
 });
@@ -78,29 +81,31 @@ server.tool(
 
 server.tool(
   "usage_by_model",
-  "Traffic share, cost, and average latency per model, aggregated from gateway traces.",
+  "Traffic share, cost, and average latency per model, aggregated from gateway traces. Admins see totals for all workspaces; other roles see only their own workspace. Without role and workspaceId, usage is empty.",
   {
     source: z
       .enum(["all", "live", "sample"])
       .default("all")
       .describe("Include live traces, seeded sample history, or both"),
+    role: z
+      .enum(ALL_ROLES as [Role, ...Role[]])
+      .optional()
+      .describe(`Caller role: ${ALL_ROLES.join(", ")}`),
+    workspaceId: z
+      .string()
+      .optional()
+      .describe("Caller's workspace; required for non-admin roles"),
   },
-  async ({ source }) => ({
+  async ({ source, role, workspaceId }) => ({
     content: [
       {
         type: "text" as const,
-        text: JSON.stringify(getUsageSummary(source), null, 2),
+        text: JSON.stringify(
+          getUsageSummaryForCaller({ role, workspaceId }, source),
+          null,
+          2,
+        ),
       },
     ],
   }),
 );
-
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
