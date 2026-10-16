@@ -54,9 +54,11 @@ export function replaceSampleTraces(samples: GatewayTrace[]): void {
 export function listTraces(options?: {
   cursor?: string | null;
   limit?: number;
+  filter?: (trace: GatewayTrace) => boolean;
 }): TraceListResult {
   const limit = Math.min(Math.max(options?.limit ?? 25, 1), 100);
-  const traces = ensureLoaded();
+  const all = ensureLoaded();
+  const traces = options?.filter ? all.filter(options.filter) : all;
   let start = 0;
 
   if (options?.cursor) {

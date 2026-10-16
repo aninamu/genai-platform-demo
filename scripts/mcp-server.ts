@@ -6,8 +6,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { executePrompt, getUsageSummary, listTraces } from "../lib/gateway";
+import { executePrompt, getUsageSummary, listTracesForCaller } from "../lib/gateway";
 import { DEFAULT_MODEL_ID, MODEL_CATALOG } from "../lib/models";
+import { ALL_ROLES } from "../lib/permissions";
+import type { Role } from "../lib/types";
 
 const server = new McpServer({
   name: "nasdaq-genai-gateway",
@@ -48,13 +50,21 @@ server.tool(
 
 server.tool(
   "list_traces",
-  "List gateway traces with simulated usage and cost.",
+  "List gateway traces with simulated usage and cost. Admins see all workspaces; other roles see only their own workspace. Without role and workspaceId, no traces are returned.",
   {
     cursor: z.string().optional(),
     limit: z.number().int().min(1).max(100).optional(),
+    role: z
+      .enum(ALL_ROLES as [Role, ...Role[]])
+      .optional()
+      .describe(`Caller role: ${ALL_ROLES.join(", ")}`),
+    workspaceId: z
+      .string()
+      .optional()
+      .describe("Caller's workspace; required for non-admin roles"),
   },
-  async ({ cursor, limit }) => {
-    const result = listTraces({ cursor, limit });
+  async ({ cursor, limit, role, workspaceId }) => {
+    const result = listTracesForCaller({ role, workspaceId }, { cursor, limit });
     return {
       content: [
         {
