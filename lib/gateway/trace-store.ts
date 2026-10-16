@@ -100,18 +100,12 @@ export function setTraceStorePathForTests(filePath: string): void {
   overridePath = filePath;
 }
 
+/** Test helper: delete the overridden store file. Never touches the real `.data` store. */
 export function resetTraceStoreForTests(): void {
-  if (overridePath) {
-    try {
-      fs.rmSync(overridePath, { force: true });
-    } catch {
-      // ignore
-    }
-  } else {
-    try {
-      fs.rmSync(DEFAULT_FILE, { force: true });
-    } catch {
-      // ignore
-    }
+  if (!overridePath) return;
+  try {
+    fs.rmSync(overridePath, { force: true });
+  } catch {
+    // ignore
   }
 }
