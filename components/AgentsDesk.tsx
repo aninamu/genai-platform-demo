@@ -150,9 +150,7 @@ export function AgentsDesk() {
         <div>
           <h1 className="text-2xl font-semibold text-white">Agents</h1>
           <p className="mt-1 max-w-2xl text-sm text-cyan-100/70">
-            BDK-shaped desk inside the GenAI workbench. Grok Bot is not embedded
-            natively — these skills emulate the workflows Nasdaq asked for,
-            with every model turn traced through the gateway.
+            BDK-shaped desk inside the GenAI workbench.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <MockBadge label="BDK layout in repo" />
