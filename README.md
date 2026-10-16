@@ -18,10 +18,10 @@ Chat and workflows have a model picker. Every option goes through the same gatew
 
 | Gateway model id | What it does | Cost |
 | --- | --- | --- |
-| `bedrock-claude-opus-sim` (default) | Scripted answers, simulated Bedrock Claude Opus | Simulated |
+| `xai-grok` (default) | **Real** call to the xAI API when `XAI_API_KEY` is set; Agents desk falls back to scripted packets without a key | Real xAI usage × xAI list price (or simulated on agent fallback) |
+| `bedrock-claude-opus-sim` | Scripted answers, simulated Bedrock Claude Opus | Simulated |
 | `bedrock-claude-sonnet-sim` | Scripted answers, simulated Claude Sonnet | Simulated |
 | `bedrock-claude-haiku-sim` | Scripted answers, simulated Claude Haiku | Simulated |
-| `xai-grok` | **Real** call to the xAI API (OpenAI-compatible `POST /chat/completions`) | Real xAI usage × xAI list price |
 
 Grok configuration (server-side env, see `.env.example`):
 

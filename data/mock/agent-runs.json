@@ -6,7 +6,7 @@
     "caller": "bdk:capital-access",
     "workspaceId": "sales",
     "skillPath": "bdk/nasdaq-desk/bot/skills/capital-access/SKILL.md",
-    "defaultModel": "bedrock-claude-opus-sim",
+    "defaultModel": "xai-grok",
     "supportsMobile": false,
     "steps": [
       {
@@ -54,7 +54,7 @@
     "caller": "bdk:corporate-action",
     "workspaceId": "data-ops",
     "skillPath": "bdk/nasdaq-desk/bot/skills/corporate-action/SKILL.md",
-    "defaultModel": "bedrock-claude-opus-sim",
+    "defaultModel": "xai-grok",
     "supportsMobile": false,
     "steps": [
       {

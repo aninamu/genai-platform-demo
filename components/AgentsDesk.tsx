@@ -31,7 +31,7 @@ export function AgentsDesk() {
   const agents = useMemo(() => getAgentsClient(), []);
   const [selectedId, setSelectedId] = useState(agents[0]?.id ?? "");
   const selected = agents.find((a) => a.id === selectedId) ?? agents[0];
-  const [model, setModel] = useState(selected?.defaultModel ?? GROK_MODEL_ID);
+  const [model, setModel] = useState(GROK_MODEL_ID);
   const [busy, setBusy] = useState(false);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, StepResult>>({});
@@ -42,7 +42,7 @@ export function AgentsDesk() {
 
   function selectAgent(agent: AgentDefinition) {
     setSelectedId(agent.id);
-    setModel(agent.defaultModel);
+    setModel(GROK_MODEL_ID);
     setActiveStepId(null);
   }
 

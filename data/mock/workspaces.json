@@ -4,7 +4,7 @@
     "name": "Engineering",
     "description": "Code assist, runbooks, and technical documentation Q&A.",
     "allowedRoles": ["engineer", "admin"],
-    "model": "bedrock-claude-opus-sim",
+    "model": "xai-grok",
     "suggestedPrompts": [
       "How do I fail over the market data gateway?",
       "What is the API style guide for new services?",
@@ -16,7 +16,7 @@
     "name": "Sales Enablement",
     "description": "Account briefs, product facts, and RFP-style answers.",
     "allowedRoles": ["sales", "admin"],
-    "model": "bedrock-claude-opus-sim",
+    "model": "xai-grok",
     "suggestedPrompts": [
       "What are the key features of Market Data Feed X?",
       "Draft talking points for Northwind Capital.",
@@ -28,7 +28,7 @@
     "name": "Client Support",
     "description": "Ticket summaries, reply drafts, and escalation guidance.",
     "allowedRoles": ["support", "admin"],
-    "model": "bedrock-claude-opus-sim",
+    "model": "xai-grok",
     "suggestedPrompts": [
       "How do I escalate a P1 connectivity outage?",
       "What is the SLA for market data reconnects?",
@@ -40,7 +40,7 @@
     "name": "Data Operations",
     "description": "Reconciliation checks and reference-data quality workflows.",
     "allowedRoles": ["data-ops", "admin"],
-    "model": "bedrock-claude-opus-sim",
+    "model": "xai-grok",
     "suggestedPrompts": [
       "How do we classify a symbology mismatch?",
       "What is the SOP for corporate-action breaks?",

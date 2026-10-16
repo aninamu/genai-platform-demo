@@ -16,7 +16,7 @@ import type {
   WorkflowDefinition,
   Workspace,
 } from "@/lib/types";
-import { getModelOption, isLiveModel } from "@/lib/models";
+import { DEFAULT_MODEL_ID, getModelOption, isLiveModel } from "@/lib/models";
 import { DocumentLibrary } from "./DocumentLibrary";
 import { MockBadge } from "./MockBadge";
 import { ModelPicker } from "./ModelPicker";
@@ -41,7 +41,7 @@ export function WorkspaceView({
   const [busy, setBusy] = useState(false);
   const [citations, setCitations] = useState<GatewayCitation[]>([]);
   const [latency, setLatency] = useState<number | undefined>();
-  const [model, setModel] = useState(workspace.model);
+  const [model, setModel] = useState(DEFAULT_MODEL_ID);
   const client = useMemo(() => createGatewayClient(), []);
 
   useEffect(() => {

@@ -7,13 +7,21 @@ export interface ModelOption {
   simulated: boolean;
 }
 
-export const DEFAULT_MODEL_ID = "bedrock-claude-opus-sim";
 export const GROK_MODEL_ID = "xai-grok";
+export const DEFAULT_MODEL_ID = GROK_MODEL_ID;
 export const DEFAULT_XAI_MODEL = "grok-4.7";
+/** Dominant model in seeded sample traffic history (not the picker default). */
+export const SAMPLE_TRAFFIC_DEFAULT_MODEL_ID = "bedrock-claude-opus-sim";
 
 export const MODEL_CATALOG: ModelOption[] = [
   {
-    id: DEFAULT_MODEL_ID,
+    id: GROK_MODEL_ID,
+    label: "Grok (xAI API, live)",
+    provider: "xai",
+    simulated: false,
+  },
+  {
+    id: SAMPLE_TRAFFIC_DEFAULT_MODEL_ID,
     label: "Claude Opus (Bedrock, simulated)",
     provider: "bedrock-sim",
     simulated: true,
@@ -29,12 +37,6 @@ export const MODEL_CATALOG: ModelOption[] = [
     label: "Claude Haiku (Bedrock, simulated)",
     provider: "bedrock-sim",
     simulated: true,
-  },
-  {
-    id: GROK_MODEL_ID,
-    label: "Grok (xAI API, live)",
-    provider: "xai",
-    simulated: false,
   },
 ];
 
