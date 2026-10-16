@@ -77,6 +77,7 @@ function TracesContent({ role }: { role: Role }) {
 
       <TrafficByModel
         client={client}
+        role={role}
         refreshKey={refreshKey}
         onSeeded={refreshAll}
       />

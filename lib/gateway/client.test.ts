@@ -19,3 +19,38 @@ describe("gateway client listTraces", () => {
     });
   });
 });
+
+describe("gateway client getUsage", () => {
+  const emptyUsage = {
+    source: "all",
+    totalRequests: 0,
+    totalCost: 0,
+    sampleRequests: 0,
+    byModel: [],
+  };
+
+  it("sends source, role, and workspaceId as query params", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () => Response.json(emptyUsage));
+    const client = createGatewayClient({ baseUrl: "http://gw.test", fetchImpl });
+
+    await client.getUsage({ source: "live", role: "sales", workspaceId: "sales" });
+
+    const url = new URL(String(fetchImpl.mock.calls[0][0]));
+    expect(url.pathname).toBe("/api/v1/usage");
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      source: "live",
+      role: "sales",
+      workspaceId: "sales",
+    });
+  });
+
+  it("defaults source to all and omits missing caller fields", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () => Response.json(emptyUsage));
+    const client = createGatewayClient({ baseUrl: "http://gw.test", fetchImpl });
+
+    await client.getUsage({ role: "admin" });
+
+    const url = new URL(String(fetchImpl.mock.calls[0][0]));
+    expect(Object.fromEntries(url.searchParams)).toEqual({ source: "all", role: "admin" });
+  });
+});

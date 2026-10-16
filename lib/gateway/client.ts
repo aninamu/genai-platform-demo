@@ -83,8 +83,16 @@ export function createGatewayClient(options: GatewayClientOptions = {}) {
       return (await res.json()) as TraceListResult;
     },
 
-    async getUsage(source: UsageSource = "all"): Promise<UsageSummary> {
-      const res = await fetchImpl(`${baseUrl}/api/v1/usage?source=${source}`, {
+    async getUsage(params?: {
+      source?: UsageSource;
+      role?: Role;
+      workspaceId?: string;
+    }): Promise<UsageSummary> {
+      const qs = new URLSearchParams({ source: params?.source ?? "all" });
+      if (params?.role) qs.set("role", params.role);
+      if (params?.workspaceId) qs.set("workspaceId", params.workspaceId);
+
+      const res = await fetchImpl(`${baseUrl}/api/v1/usage?${qs}`, {
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       if (!res.ok) {

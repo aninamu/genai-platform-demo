@@ -15,7 +15,7 @@ export { createGatewayClient, GatewayClientError } from "./client";
 export type { GatewayClient, ModelAvailability } from "./client";
 export { calculateCost, listPricedModels, PRICING_TABLE_VERSION } from "./pricing";
 export { listTraces, appendTrace } from "./trace-store";
-export { listTracesForCaller } from "./trace-access";
+export { getUsageSummaryForCaller, listTracesForCaller } from "./trace-access";
 export type { TraceCaller } from "./trace-access";
 export { getUsageSummary, summarizeUsage } from "./usage";
 export { seedSampleTraffic, SAMPLE_TRACE_COUNT } from "./sample-traffic";
