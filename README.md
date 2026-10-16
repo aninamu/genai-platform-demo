@@ -10,7 +10,7 @@ cp .env.example .env.local   # optional: add XAI_API_KEY for real Grok calls
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), pick a mock SSO role, and try Sales chat + workflows.
+Open [http://localhost:3000](http://localhost:3000), pick a mock SSO role, and try Sales chat + workflows. The **Agents** tab emulates four BDK workflows (Capital Access, meeting prep with X context, corporate-action triage, desktop→phone research) without embedding Grok Bot natively.
 
 ## Models
 

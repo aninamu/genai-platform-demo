@@ -4,7 +4,9 @@
 import workspaces from "@/data/mock/workspaces.json";
 import responses from "@/data/mock/responses.json";
 import workflows from "@/data/mock/workflows.json";
+import agents from "@/data/mock/agent-runs.json";
 import type {
+  AgentDefinition,
   ScriptedResponse,
   WorkflowDefinition,
   Workspace,
@@ -26,6 +28,14 @@ export function getWorkflowsClient(workspaceId?: WorkspaceId): WorkflowDefinitio
 
 export function getResponsesClient(): ScriptedResponse[] {
   return responses as ScriptedResponse[];
+}
+
+export function getAgentsClient(): AgentDefinition[] {
+  return agents as AgentDefinition[];
+}
+
+export function getAgentClient(id: string): AgentDefinition | undefined {
+  return getAgentsClient().find((a) => a.id === id);
 }
 
 export function renderTemplate(
@@ -74,6 +84,21 @@ export const DOCUMENT_INDEX: {
   {
     id: "dataops-sop",
     title: "Synthetic sample document — Reference Data Reconciliation SOP",
+    workspaceId: "data-ops",
+  },
+  {
+    id: "capital-access-notes",
+    title: "Synthetic sample document — Capital Access interview notes",
+    workspaceId: "sales",
+  },
+  {
+    id: "meeting-prep-sources",
+    title: "Synthetic sample document — Meeting prep packet (Northwind Capital)",
+    workspaceId: "sales",
+  },
+  {
+    id: "corporate-action-bulletin",
+    title: "Synthetic sample document — Corporate action bulletin NW-CA-482",
     workspaceId: "data-ops",
   },
 ];

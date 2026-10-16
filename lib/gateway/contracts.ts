@@ -12,6 +12,8 @@ export interface GatewayRequest {
   caller: string;
   workspaceId?: string;
   workflowId?: string;
+  /** BDK agent step id from data/mock/agent-runs.json */
+  agentStepId?: string;
   correlationId?: string;
   stream?: boolean;
   documents?: GatewayDocumentContext[];
@@ -62,6 +64,7 @@ export interface GatewayTrace {
   caller: string;
   workspaceId?: string;
   workflowId?: string;
+  agentStepId?: string;
   model: string;
   input: string;
   output: string;

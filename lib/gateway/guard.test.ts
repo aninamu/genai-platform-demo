@@ -49,13 +49,17 @@ describe("gateway architectural guard", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("chat and workflows call the gateway client, not the mock model", () => {
+  it("chat, workflows, and agents call the gateway client, not the mock model", () => {
     const workspace = fs.readFileSync(
       path.join(process.cwd(), "components/WorkspaceView.tsx"),
       "utf8",
     );
     const workflow = fs.readFileSync(
       path.join(process.cwd(), "components/PresetWorkflow.tsx"),
+      "utf8",
+    );
+    const agents = fs.readFileSync(
+      path.join(process.cwd(), "components/AgentsDesk.tsx"),
       "utf8",
     );
 
@@ -66,5 +70,10 @@ describe("gateway architectural guard", () => {
     expect(workflow).toMatch(/createGatewayClient/);
     expect(workflow).toMatch(/client\.complete/);
     expect(workflow).not.toMatch(/runMockModel/);
+
+    expect(agents).toMatch(/createGatewayClient/);
+    expect(agents).toMatch(/client\.complete/);
+    expect(agents).toMatch(/agentStepId/);
+    expect(agents).not.toMatch(/runMockModel/);
   });
 });

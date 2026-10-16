@@ -36,6 +36,13 @@ const SEAMS = [
     current: "Role picker stored in localStorage (mock SSO).",
     replaceWith: "Enterprise SSO / IdP",
   },
+  {
+    name: "BDK Agents tab",
+    status: "mock",
+    current:
+      "Agents tab emulates Grok Bot–style workflows via BDK skill markdown + gateway scripted steps (approval gates, phone handoff). Not a live bdk serve embed.",
+    replaceWith: "Hosted BDK agent with custom channel into the workbench tab",
+  },
 ];
 
 export default function AboutDemoPage() {
@@ -70,6 +77,10 @@ export default function AboutDemoPage() {
           </li>
           <li>SSO / roles (localStorage)</li>
           <li>Uploaded files (browser only)</li>
+          <li>
+            Agents desk: BDK skill layout in-repo; runs are scripted through the
+            gateway (Grok falls back to scripted X-context packets without a key)
+          </li>
         </ul>
       </section>
 

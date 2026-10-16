@@ -1,4 +1,6 @@
+import { GROK_MODEL_ID } from "@/lib/models";
 import {
+  getAgentStep,
   getScriptedResponses,
   getSeedDocuments,
   getWorkflow,
@@ -103,6 +105,29 @@ export async function runMockModel(
 ): Promise<MockModelResult> {
   if (request.input.trim().toLowerCase() === "__force_error__") {
     throw new Error("Simulated model failure");
+  }
+
+  if (request.agentStepId) {
+    const hit = getAgentStep(request.agentStepId);
+    if (!hit) {
+      throw new Error(`Unknown agent step: ${request.agentStepId}`);
+    }
+    const useX =
+      request.model === GROK_MODEL_ID && Boolean(hit.step.outputWithX);
+    const output = useX
+      ? (hit.step.outputWithX as string)
+      : hit.step.output;
+    const citations = simulateRetrieval(
+      request.workspaceId ?? hit.agent.workspaceId,
+      request.input,
+      hit.step.citationIds,
+    );
+    return {
+      output,
+      inputTokens: estimateTokens(request.input),
+      outputTokens: estimateTokens(output),
+      citations,
+    };
   }
 
   if (request.workflowId) {

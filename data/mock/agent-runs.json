@@ -1,0 +1,90 @@
+[
+  {
+    "id": "capital-access",
+    "name": "Capital Access knowledge capture",
+    "description": "Interview notes become an approved playbook; teammates then ask cited questions. Targets knowledge that lives inside people’s heads.",
+    "caller": "bdk:capital-access",
+    "workspaceId": "sales",
+    "skillPath": "bdk/nasdaq-desk/bot/skills/capital-access/SKILL.md",
+    "defaultModel": "bedrock-claude-opus-sim",
+    "supportsMobile": false,
+    "steps": [
+      {
+        "id": "capital-access-draft",
+        "label": "Draft playbook from notes",
+        "input": "Turn the Capital Access interview notes into a draft playbook for first-time issuer non-deal roadshows. Keep decision gates and owners explicit.",
+        "output": "## Draft playbook — Capital Access NDR prep (awaiting approval)\n\n**Audience:** Capital Access + sector bankers\n\n### Process\n1. Build a coverage map of two buy-side accounts that already cover the peer set.\n2. Soft block: start CFOs new to group lunches with a friendly long-only 1:1 — never a hedge-fund panel first.\n3. Freeze “whisper range” / indicative pricing language until Legal clears the deck.\n\n### Decision gates\n| Gate | Owner |\n| --- | --- |\n| Coverage map signed | Sector banker |\n| Forward-looking slides | Compliance |\n| Travel window ≥ 10 BD | IR |\n\n_Draft only — not queryable until approved._",
+        "citationIds": ["capital-access-notes"],
+        "approvalGate": true
+      },
+      {
+        "id": "capital-access-query",
+        "label": "Ask the approved playbook",
+        "input": "Per the approved Capital Access playbook, what is the soft block for a CFO who has never done a group lunch?",
+        "output": "## Answer (approved playbook)\n\nSchedule a **1:1 with a friendly long-only** first. Do **not** open with a hedge-fund panel.\n\n**Citation:** Capital Access interview notes — Maya Chen (synthetic), “What is not in any system of record.”\n\n_Grounded in the approved playbook derived from the interview notes._",
+        "citationIds": ["capital-access-notes"],
+        "requiresPriorApproval": true
+      }
+    ]
+  },
+  {
+    "id": "meeting-prep",
+    "name": "Exec / client meeting prep",
+    "description": "One-page brief from filings and news. Grok adds X context — the differentiator versus Claude on Bedrock.",
+    "caller": "bdk:meeting-prep",
+    "workspaceId": "sales",
+    "skillPath": "bdk/nasdaq-desk/bot/skills/meeting-prep/SKILL.md",
+    "defaultModel": "xai-grok",
+    "supportsMobile": true,
+    "steps": [
+      {
+        "id": "meeting-prep-brief",
+        "label": "Build one-page brief",
+        "input": "Prepare a one-page meeting brief for Northwind Capital using the meeting-prep packet (filings, news, and X context when on Grok).",
+        "output": "## Meeting brief — Northwind Capital\n\n**Ask:** Pilot Feed X entitlement for 3 desks / 60 days.\n\n### Filings & news\n- 10-Q: AUM +4% QoQ; vendor concentration called out as ops risk.\n- 8-K: Asia desk expansion → APAC latency/symbology pressure.\n- Trade press: piloting a second US equities vendor; use 2026.09 corp-action fix as recovery narrative.\n\n### Talking points\n1. Entitlement dashboard clarity for multi-desk pilot.\n2. Symbology quality SLA for Asia open.\n3. Reference the corp-action delay fix without over-promising.\n\n_Claude path — X context omitted. Switch to Grok for social chatter._",
+        "outputWithX": "## Meeting brief — Northwind Capital\n\n**Ask:** Pilot Feed X entitlement for 3 desks / 60 days.\n\n### Filings & news\n- 10-Q: AUM +4% QoQ; vendor concentration called out as ops risk.\n- 8-K: Asia desk expansion → APAC latency/symbology pressure.\n- Trade press: piloting a second US equities vendor; use 2026.09 corp-action fix as recovery narrative.\n\n### X context (Grok)\n- `@deskwatcher` · 2h — Asia open lag chatter on vendor B.\n- `@refdataops` · 5h — NW-CA-482 remap still pending on composite vs local.\n\n### Talking points\n1. Entitlement dashboard clarity for multi-desk pilot.\n2. Symbology quality SLA for Asia open — address the X lag narrative with facts.\n3. Reference the corp-action delay fix without over-promising.\n\n_Grok path — X context included from the grounded packet._",
+        "citationIds": ["meeting-prep-sources", "sales-account-notes"]
+      }
+    ]
+  },
+  {
+    "id": "corporate-action",
+    "name": "Corporate-action break triage",
+    "description": "Read the bulletin, flag reconciliation breaks, draft a client notice — send stays blocked until approval.",
+    "caller": "bdk:corporate-action",
+    "workspaceId": "data-ops",
+    "skillPath": "bdk/nasdaq-desk/bot/skills/corporate-action/SKILL.md",
+    "defaultModel": "bedrock-claude-opus-sim",
+    "supportsMobile": false,
+    "steps": [
+      {
+        "id": "corporate-action-triage",
+        "label": "Triage breaks + draft notice",
+        "input": "Triage bulletin NW-CA-482 against the reconciliation SOP. Classify breaks and draft a client notice for approval before send.",
+        "output": "## Triage — NW-CA-482\n\n| Break | Class | Proposed fix |\n| --- | --- | --- |\n| AAPL.O vs AAPL UW | Type-A | Remap MIC → composite; block publish until done |\n| 7203 JT lag | Type-B | Publish with quality flag |\n| XYZ CA pending | Type-C | Freeze until CA ID NW-CA-482 applied |\n\n**Quality gate:** unresolved must stay under 0.5%; zero Type-A before sign-off.\n\n### Client notice (draft — not sent)\n> We are investigating corporate-action bulletin NW-CA-482 (2-for-1 split). One Type-A symbology remap is blocking full publication; Type-B Asia lag is quality-flagged; Type-C symbols remain frozen until the CA ID is stamped. We will confirm when Type-A clears.\n\n_Approval required before this notice is marked sent._",
+        "citationIds": ["corporate-action-bulletin", "dataops-sop"],
+        "approvalGate": true
+      }
+    ]
+  },
+  {
+    "id": "mobile-research",
+    "name": "Desktop research → phone",
+    "description": "Start a longer research task here, then open the phone view for the finished brief. Voice waits on Nasdaq’s mobile app.",
+    "caller": "bdk:mobile-research",
+    "workspaceId": "sales",
+    "skillPath": "bdk/nasdaq-desk/bot/skills/mobile-research/SKILL.md",
+    "defaultModel": "xai-grok",
+    "supportsMobile": true,
+    "steps": [
+      {
+        "id": "mobile-research-run",
+        "label": "Run long research brief",
+        "input": "Produce a meeting-ready research brief for Northwind Capital that I can check on my phone before walking into the room. Include filings, news, and X context when on Grok.",
+        "output": "## Research brief — Northwind Capital (desktop → phone)\n\n**Status:** Ready for mobile handoff\n\n### Thesis\nNorthwind is expanding Asia coverage while dual-sourcing US quotes. Feed X wins on entitlement clarity and symbology remediation after the 2026.09 corp-action fix.\n\n### Evidence\n- Filings: 10-Q vendor-concentration risk; 8-K Asia expansion.\n- News: second-vendor pilot for US equities.\n- Claude path: X chatter omitted.\n\n### Open the phone view\nUse **Open phone handoff** to read this same brief on `/agents/mobile`.\n\n_Voice control stays disabled until Nasdaq’s mobile app lands._",
+        "outputWithX": "## Research brief — Northwind Capital (desktop → phone)\n\n**Status:** Ready for mobile handoff\n\n### Thesis\nNorthwind is expanding Asia coverage while dual-sourcing US quotes. Feed X wins on entitlement clarity and symbology remediation after the 2026.09 corp-action fix — and can answer the live Asia-lag narrative on X with facts.\n\n### Evidence\n- Filings: 10-Q vendor-concentration risk; 8-K Asia expansion.\n- News: second-vendor pilot for US equities.\n- X (Grok): `@deskwatcher` Asia lag; `@refdataops` NW-CA-482 remap pending.\n\n### Open the phone view\nUse **Open phone handoff** to read this same brief on `/agents/mobile`.\n\n_Voice control stays disabled until Nasdaq’s mobile app lands._",
+        "citationIds": ["meeting-prep-sources", "sales-account-notes", "corporate-action-bulletin"]
+      }
+    ]
+  }
+]

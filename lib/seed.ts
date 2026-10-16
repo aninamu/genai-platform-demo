@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type {
+  AgentDefinition,
+  AgentStepDefinition,
   ScriptedResponse,
   SeedDocument,
   WorkflowDefinition,
@@ -34,6 +36,25 @@ export function getWorkflow(id: string): WorkflowDefinition | undefined {
   return getWorkflows().find((w) => w.id === id);
 }
 
+export function getAgents(): AgentDefinition[] {
+  return readJson<AgentDefinition[]>("agent-runs.json");
+}
+
+export function getAgent(id: string): AgentDefinition | undefined {
+  return getAgents().find((a) => a.id === id);
+}
+
+export function getAgentStep(stepId: string): {
+  agent: AgentDefinition;
+  step: AgentStepDefinition;
+} | undefined {
+  for (const agent of getAgents()) {
+    const step = agent.steps.find((s) => s.id === stepId);
+    if (step) return { agent, step };
+  }
+  return undefined;
+}
+
 const DOC_WORKSPACE: Record<string, WorkspaceId | "shared"> = {
   "eng-runbook": "engineering",
   "eng-api-guide": "engineering",
@@ -42,6 +63,9 @@ const DOC_WORKSPACE: Record<string, WorkspaceId | "shared"> = {
   "sales-release-notes": "sales",
   "support-playbook": "support",
   "dataops-sop": "data-ops",
+  "capital-access-notes": "sales",
+  "meeting-prep-sources": "sales",
+  "corporate-action-bulletin": "data-ops",
 };
 
 export function getSeedDocuments(workspaceId?: string): SeedDocument[] {

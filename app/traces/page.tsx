@@ -45,7 +45,8 @@ function TracesContent() {
           <h1 className="text-2xl font-semibold text-white">Gateway traces</h1>
           <p className="mt-1 text-sm text-cyan-100/70">
             Prompts routed through the gateway. Claude usage and cost are
-            simulated; Grok traces carry real xAI token counts and cost.
+            simulated; Grok traces carry real xAI token counts and cost. Agent
+            desk runs use callers like <code>bdk:meeting-prep</code>.
           </p>
         </div>
         <div className="flex gap-2">
@@ -59,6 +60,13 @@ function TracesContent() {
           </button>
         </div>
       </div>
+
+      <p className="rounded border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-100/90">
+        Commercial note (talk track): once the legal addendum is signed, Grok
+        and Grok Bot usage on this gateway counts toward the existing $600K xAI
+        commit. This page shows per-request model, tokens, and cost — it does
+        not calculate that commitment.
+      </p>
 
       {error && (
         <p className="text-sm text-red-300" role="alert">

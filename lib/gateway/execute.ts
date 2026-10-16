@@ -25,6 +25,7 @@ function buildTrace(
     caller: request.caller,
     workspaceId: request.workspaceId,
     workflowId: request.workflowId,
+    agentStepId: request.agentStepId,
     model: response.model,
     input: request.input,
     output: response.output,
@@ -71,7 +72,7 @@ export async function executePrompt(
 ): Promise<GatewayResponse> {
   const started = Date.now();
   const correlationId = request.correlationId ?? randomUUID();
-  const live = request.model === GROK_MODEL_ID;
+  const wantsLive = request.model === GROK_MODEL_ID;
 
   if (request.idempotencyKey) {
     const cached = findIdempotent(request.idempotencyKey);
@@ -85,16 +86,36 @@ export async function executePrompt(
     let citations: GatewayResponse["citations"];
     let cachedInputTokens = 0;
     let providerModel: string | undefined;
+    let simulated = !wantsLive;
 
-    if (live) {
-      // Upstream call is not streamed; the gateway returns the assembled output either way.
-      const result = await runXaiModel(request);
-      output = result.output;
-      inputTokens = result.inputTokens;
-      outputTokens = result.outputTokens;
-      cachedInputTokens = result.cachedInputTokens;
-      providerModel = result.providerModel;
-      citations = [];
+    if (wantsLive) {
+      try {
+        // Upstream call is not streamed; the gateway returns the assembled output either way.
+        const result = await runXaiModel(request);
+        output = result.output;
+        inputTokens = result.inputTokens;
+        outputTokens = result.outputTokens;
+        cachedInputTokens = result.cachedInputTokens;
+        providerModel = result.providerModel;
+        citations = [];
+        simulated = false;
+      } catch (err) {
+        // Agent desk demos stay deterministic without XAI_API_KEY: fall back to
+        // the scripted Grok-shaped packet (includes X context when authored).
+        if (
+          err instanceof ProviderNotConfiguredError &&
+          request.agentStepId
+        ) {
+          const result = await runMockModel(request);
+          output = result.output;
+          inputTokens = result.inputTokens;
+          outputTokens = result.outputTokens;
+          citations = result.citations;
+          simulated = true;
+        } else {
+          throw err;
+        }
+      }
     } else if (request.stream) {
       const generator = streamMockModel(request);
       let assembled = "";
@@ -134,7 +155,7 @@ export async function executePrompt(
       latencyMs: Date.now() - started,
       status: "success",
       correlationId,
-      simulated: !live,
+      simulated,
       ...(providerModel ? { providerModel } : {}),
       citations,
     };
@@ -155,7 +176,7 @@ export async function executePrompt(
       latencyMs: Date.now() - started,
       status: "error",
       correlationId,
-      simulated: !live,
+      simulated: !wantsLive,
       error:
         err instanceof ProviderNotConfiguredError
           ? {
