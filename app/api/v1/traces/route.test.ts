@@ -62,6 +62,18 @@ describe("GET /api/v1/traces", () => {
     expect(page2.paging.nextCursor).toBeNull();
   });
 
+  it("never leaks another workspace's traces via a foreign cursor", async () => {
+    for (const cursor of ["sales-1", "untagged-1"]) {
+      const page = await list(
+        `?role=engineer&workspaceId=engineering&limit=1&cursor=${cursor}`,
+      );
+      expect(ids(page)).toEqual(["eng-2"]);
+      expect(page.paging.nextCursor).toBe("eng-2");
+    }
+    const sales = await list("?role=sales&workspaceId=sales&cursor=eng-2");
+    expect(ids(sales)).toEqual(["sales-1"]);
+  });
+
   it("admin gets traces from every workspace", async () => {
     expect(ids(await list("?role=admin"))).toEqual([
       "untagged-1",
