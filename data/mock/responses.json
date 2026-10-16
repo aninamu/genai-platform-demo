@@ -1,0 +1,86 @@
+[
+  {
+    "id": "eng-failover",
+    "workspaceId": "engineering",
+    "keywords": ["fail over", "failover", "gateway", "market data gateway"],
+    "citationIds": ["eng-runbook"],
+    "answer": "To fail over the market data gateway:\n\n1. Confirm primary health in the ops console.\n2. Drain publishers on `md-gw-primary`.\n3. Promote `md-gw-standby` using `gwctl promote --region us-east-1`.\n4. Validate tick continuity for at least 60 seconds.\n5. Open an incident note with the cutover timestamp.\n\nSee the Market Data Gateway Runbook for exact commands."
+  },
+  {
+    "id": "eng-api-style",
+    "workspaceId": "engineering",
+    "keywords": ["api style", "style guide", "rest", "openapi"],
+    "citationIds": ["eng-api-guide"],
+    "answer": "New services must use plural kebab-case paths under `/v1/`, camelCase JSON fields, and RFC 9457 problem details for errors. Prefer cursor pagination (`cursor`, `limit`) and require `Idempotency-Key` on mutating creates. Full conventions are in the API Style Guide."
+  },
+  {
+    "id": "eng-oncall",
+    "workspaceId": "engineering",
+    "keywords": ["on-call", "oncall", "escalation"],
+    "citationIds": ["eng-runbook"],
+    "answer": "On-call escalation: page primary (15 min), then secondary, then engineering manager for Sev-1. Always attach gateway health screenshots and the last successful promote event."
+  },
+  {
+    "id": "sales-feed-x",
+    "workspaceId": "sales",
+    "keywords": ["market data feed x", "feed x", "features", "key features"],
+    "citationIds": ["sales-product-sheet"],
+    "answer": "Market Data Feed X provides low-latency consolidated quotes, corporate actions, and reference symbology for 45+ venues. Differiators: sub-3ms median latency, normalized symbology, and entitlement-aware delivery. Use the product sheet when answering RFPs."
+  },
+  {
+    "id": "sales-northwind",
+    "workspaceId": "sales",
+    "keywords": ["northwind", "account brief", "talking points"],
+    "citationIds": ["sales-account-notes", "sales-product-sheet", "sales-release-notes"],
+    "answer": "Northwind Capital is evaluating Feed X for their multi-asset desk. Prioritize latency SLAs, symbology coverage for Asia venues, and the Q3 entitlement dashboard. They previously flagged delayed corp-action notices — release 2026.09 addresses that."
+  },
+  {
+    "id": "sales-pricing",
+    "workspaceId": "sales",
+    "keywords": ["price", "pricing", "competitor"],
+    "citationIds": ["sales-product-sheet"],
+    "answer": "Feed X list pricing starts at enterprise tier with volume-based entitlements. Compared to generic commodity feeds, emphasize total cost of ownership from normalized symbology and reduced reconciliation overhead rather than raw Mbps price."
+  },
+  {
+    "id": "support-p1",
+    "workspaceId": "support",
+    "keywords": ["p1", "escalate", "connectivity", "outage"],
+    "citationIds": ["support-playbook"],
+    "answer": "For a P1 connectivity outage: open a Sev-1 ticket, notify the bridge within 5 minutes, and do not ask the client to restart until primary status is confirmed. Use the Client Support Escalation Playbook section 2."
+  },
+  {
+    "id": "support-sla",
+    "workspaceId": "support",
+    "keywords": ["sla", "reconnect", "market data"],
+    "citationIds": ["support-playbook"],
+    "answer": "Market data reconnect SLA: acknowledge within 15 minutes, restore or fail over within 60 minutes for Sev-1, and provide a written summary within 4 hours."
+  },
+  {
+    "id": "support-reply",
+    "workspaceId": "support",
+    "keywords": ["delayed feed", "draft a reply", "complaint"],
+    "citationIds": ["support-playbook"],
+    "answer": "Suggested reply: thank the client, confirm the entitlement and region under investigation, share the current ETA, and offer a bridge invite. Do not speculate on root cause until engineering posts an update."
+  },
+  {
+    "id": "dataops-symbology",
+    "workspaceId": "data-ops",
+    "keywords": ["symbology", "mismatch", "classify"],
+    "citationIds": ["dataops-sop"],
+    "answer": "Classify symbology mismatches as Type-A (mapping drift), Type-B (vendor lag), or Type-C (corporate action pending). Type-A and Type-C block publication until fixed; Type-B may publish with a quality flag."
+  },
+  {
+    "id": "dataops-corp-action",
+    "workspaceId": "data-ops",
+    "keywords": ["corporate-action", "corp action", "breaks"],
+    "citationIds": ["dataops-sop"],
+    "answer": "Corporate-action breaks: freeze affected symbols, pull vendor delta, apply SOP remap, and re-run quality gates before unfreezing. Document the CA ID on the break ticket."
+  },
+  {
+    "id": "dataops-quality",
+    "workspaceId": "data-ops",
+    "keywords": ["reconciliation", "quality gates", "yesterday"],
+    "citationIds": ["dataops-sop"],
+    "answer": "Quality gates require <0.5% unresolved breaks and zero Type-A mismatches before sign-off. Review the reconciliation SOP checklist before releasing the daily package."
+  }
+]

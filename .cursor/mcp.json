@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "nasdaq-genai-gateway": {
+      "command": "pnpm",
+      "args": ["mcp"],
+      "cwd": "."
+    }
+  }
+}

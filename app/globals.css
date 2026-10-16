@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --background: #071628;
+  --foreground: #e8f4ff;
+  --nasdaq-navy: #0a1f3d;
+  --nasdaq-cyan: #22d3ee;
+  --card: #0d2240;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+body {
+  background: radial-gradient(ellipse at top, #0d2a52 0%, #071628 55%, #04101f 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}

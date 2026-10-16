@@ -1,0 +1,50 @@
+---
+description: Require all AI prompts to use the observable GenAI gateway and expose API, MCP, and programmatic access
+alwaysApply: true
+---
+
+# GenAI Gateway Requirement
+
+All prompt execution MUST pass through one gateway abstraction. UI components,
+workflows, route handlers, MCP tools, scripts, and tests must never call a model
+provider or mock model directly.
+
+## Required gateway behavior
+
+- Accept a normalized request containing the prompt/input, selected model,
+  caller, workflow or workspace, and correlation ID.
+- Return the output plus model, input tokens, output tokens, total tokens,
+  estimated cost, currency, latency, status, and correlation ID.
+- Persist one trace for every successful or failed request. The trace must
+  include the complete input and output for this synthetic demo.
+- Streaming requests must record the assembled final output and usage after the
+  stream completes.
+- Cost must be calculated centrally from a versioned model-price table. Unknown
+  pricing must be represented as `null` with an explicit reason, never zero.
+- UI usage and cost displays must read gateway traces; do not maintain separate
+  fabricated metrics.
+
+## Required access surfaces
+
+Expose the same gateway capability through:
+
+1. A versioned HTTP API under `/api/v1/`.
+2. MCP tools for prompt execution and trace/usage retrieval.
+3. A typed TypeScript client or exported service for programmatic use.
+
+All surfaces must share request, response, error, authorization, and telemetry
+contracts rather than reimplementing execution.
+
+## Mock implementation
+
+Mocks are allowed and preferred until real components are added. The mock
+gateway must use deterministic scripted responses, simulated token/cost values,
+and the same contracts and trace path as a real gateway. Clearly label simulated
+values in the UI and trace metadata.
+
+## Verification
+
+- Add tests proving every prompt-producing feature routes through the gateway.
+- Test success, failure, streaming completion, unknown pricing, and trace reads.
+- Treat any direct provider/mock invocation outside the gateway implementation
+  as an architectural violation.
