@@ -4,11 +4,15 @@ import type {
   GatewayResponse,
   GatewayTrace,
 } from "./contracts";
-import { GROK_MODEL_ID } from "@/lib/models";
+import { DEFAULT_XAI_MODEL, GROK_MODEL_ID } from "@/lib/models";
 import { runMockModel, streamMockModel } from "./mock-model";
 import { calculateCost } from "./pricing";
 import { appendTrace, findTraceByIdempotencyKey } from "./trace-store";
-import { ProviderNotConfiguredError, runXaiModel } from "./xai-model";
+import {
+  getXaiConfig,
+  ProviderNotConfiguredError,
+  runXaiModel,
+} from "./xai-model";
 
 export const PROVIDER_NOT_CONFIGURED_TYPE =
   "https://api.example.com/problems/provider-not-configured";
@@ -111,6 +115,8 @@ export async function executePrompt(
           inputTokens = result.inputTokens;
           outputTokens = result.outputTokens;
           citations = result.citations;
+          // Price against the configured xAI model id so traces still show cost.
+          providerModel = getXaiConfig().model || DEFAULT_XAI_MODEL;
           simulated = true;
         } else {
           throw err;

@@ -166,6 +166,8 @@ describe("executePrompt", () => {
 
       expect(res.status).toBe("success");
       expect(res.simulated).toBe(true);
+      expect(res.cost).not.toBeNull();
+      expect(res.providerModel).toBeTruthy();
       expect(res.output).toMatch(/X context \(Grok\)/i);
       expect(res.citations?.some((c) => c.documentId === "meeting-prep-sources")).toBe(
         true,
