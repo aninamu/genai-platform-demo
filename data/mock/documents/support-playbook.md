@@ -30,6 +30,8 @@ Rules:
 
 ## Section 3 — P2 and P3 paths
 
+> Example values (synthetic); adjust owners and timings to your team.
+
 ### P2 / Sev-2
 
 1. Open a Sev-2 ticket. Owner: support duty lead.
