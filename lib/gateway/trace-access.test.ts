@@ -4,7 +4,11 @@ import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { GatewayTrace } from "./contracts";
 import { getWorkspace } from "@/lib/seed";
-import { listTracesForCaller, traceCallerFromEnv } from "./trace-access";
+import {
+  getUsageSummaryForCaller,
+  listTracesForCaller,
+  traceCallerFromEnv,
+} from "./trace-access";
 import { appendTrace, setTraceStorePathForTests } from "./trace-store";
 
 function trace(id: string, workspaceId?: string): GatewayTrace {
@@ -99,6 +103,47 @@ describe("listTracesForCaller", () => {
   it("returns no traces for a workspace the role cannot access or that does not exist", () => {
     expect(listTracesForCaller({ role: "engineer", workspaceId: "sales" }).data).toEqual([]);
     expect(listTracesForCaller({ role: "support", workspaceId: "unknown" }).data).toEqual([]);
+  });
+});
+
+describe("getUsageSummaryForCaller", () => {
+  beforeEach(() => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "gw-usage-access-"));
+    setTraceStorePathForTests(path.join(dir, "traces.json"));
+    appendTrace(trace("eng-1", "engineering"));
+    appendTrace(trace("sales-1", "sales"));
+    appendTrace(trace("eng-2", "engineering"));
+    appendTrace(trace("untagged-1"));
+  });
+
+  it("admin totals include every workspace and untagged traces", () => {
+    expect(getUsageSummaryForCaller({ role: "admin" }).totalRequests).toBe(4);
+  });
+
+  it("non-admin totals cover only their own workspace", () => {
+    expect(
+      getUsageSummaryForCaller({ role: "engineer", workspaceId: "engineering" }).totalRequests,
+    ).toBe(2);
+    expect(getUsageSummaryForCaller({ role: "sales", workspaceId: "sales" }).totalRequests).toBe(1);
+  });
+
+  it("returns empty usage for missing, unknown, or cross-workspace callers", () => {
+    for (const caller of [
+      {},
+      { workspaceId: "engineering" },
+      { role: "engineer" as const },
+      { role: "engineer" as const, workspaceId: "sales" },
+      { role: "support" as const, workspaceId: "unknown" },
+    ]) {
+      const summary = getUsageSummaryForCaller(caller, "live");
+      expect(summary).toEqual({
+        source: "live",
+        totalRequests: 0,
+        totalCost: 0,
+        sampleRequests: 0,
+        byModel: [],
+      });
+    }
   });
 });
 

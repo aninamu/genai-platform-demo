@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { GatewayClient } from "@/lib/gateway/client";
 import type { UsageSource, UsageSummary } from "@/lib/gateway/contracts";
 import { getModelOption } from "@/lib/models";
+import type { Role } from "@/lib/types";
 import { MockBadge } from "./MockBadge";
 
 const SOURCES: { id: UsageSource; label: string }[] = [
@@ -18,10 +19,14 @@ function usd(value: number | null): string {
 
 export function TrafficByModel({
   client,
+  role,
+  workspaceId,
   refreshKey,
   onSeeded,
 }: {
   client: GatewayClient;
+  role: Role;
+  workspaceId?: string;
   refreshKey: number;
   onSeeded: () => void;
 }) {
@@ -32,12 +37,12 @@ export function TrafficByModel({
 
   const load = useCallback(async () => {
     try {
-      setSummary(await client.getUsage(source));
+      setSummary(await client.getUsage({ source, role, workspaceId }));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load usage");
     }
-  }, [client, source]);
+  }, [client, source, role, workspaceId]);
 
   useEffect(() => {
     void load();
