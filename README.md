@@ -49,7 +49,7 @@ The admin **Traces** page shows traffic share (requests and %), total and averag
 | `pnpm mcp` | MCP stdio server (`run_prompt`, `list_traces`, `usage_by_model`) |
 | `pnpm seed:sample` | Seed labeled sample traffic history |
 
-The MCP stdio entrypoint is `scripts/mcp-stdio.ts`; run it with `pnpm mcp`. `scripts/mcp-server.ts` only exports the configured `server` (no transport), so tests can connect to it in-process.
+The MCP stdio entrypoint is `scripts/mcp-stdio.ts`; run it with `pnpm mcp`. `scripts/mcp-server.ts` only exports `createMcpServer(caller)` (no transport), so tests can connect to it in-process with any caller; the stdio entrypoint passes `traceCallerFromEnv()`.
 
 ## Gateway access
 
