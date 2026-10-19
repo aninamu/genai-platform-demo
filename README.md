@@ -49,16 +49,18 @@ The admin **Traces** page shows traffic share (requests and %), total and averag
 | `pnpm mcp` | MCP stdio server (`run_prompt`, `list_traces`, `usage_by_model`) |
 | `pnpm seed:sample` | Seed labeled sample traffic history |
 
+The MCP stdio entrypoint is `scripts/mcp-stdio.ts`; run it with `pnpm mcp`. `scripts/mcp-server.ts` only exports `createMcpServer(caller)` (no transport), so tests can connect to it in-process with any caller; the stdio entrypoint passes `traceCallerFromEnv()`.
+
 ## Gateway access
 
 Every prompt goes through `lib/gateway`:
 
 - `POST /api/v1/completions`
 - `GET /api/v1/traces?role=&workspaceId=&cursor=&limit=` (admins see all traces; other roles see only their own workspace; missing or invalid caller info returns an empty list)
-- `GET /api/v1/usage?source=all|live|sample`
+- `GET /api/v1/usage?source=all|live|sample&role=&workspaceId=` (same caller scoping as traces)
 - `POST /api/v1/traces/sample` (seed sample history)
 - `GET /api/v1/models` (catalog + whether Grok is configured)
 - MCP tools via `pnpm mcp` (see `.cursor/mcp.json`). `list_traces` and `usage_by_model` are scoped to the operator's `MCP_ROLE` and `MCP_WORKSPACE_ID` environment variables, not tool input; `.cursor/mcp.json` defaults them to `engineer` / `engineering`, and unset or unknown values return no traces and empty usage.
 - Typed client: `createGatewayClient()` from `lib/gateway`
 
-Traces are stored in `.data/traces.json` (gitignored).
+Traces are stored in `.data/traces.json` (gitignored). `pnpm test` uses a temp store per test file and fails if `.data/traces.json` changes during the run.
