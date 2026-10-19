@@ -6,18 +6,17 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { executePrompt, getUsageSummary, listTracesForCaller } from "../lib/gateway";
+import {
+  executePrompt,
+  getUsageSummary,
+  listTracesForCaller,
+  traceCallerFromEnv,
+} from "../lib/gateway";
 import { DEFAULT_MODEL_ID, MODEL_CATALOG } from "../lib/models";
-import { ALL_ROLES } from "../lib/permissions";
-import type { Role } from "../lib/types";
 
 // Trace scope comes from the operator's environment, never from tool input,
 // so MCP clients cannot self-assert a broader role.
-const envRole = process.env.MCP_ROLE;
-const TRACE_CALLER = {
-  role: ALL_ROLES.includes(envRole as Role) ? (envRole as Role) : undefined,
-  workspaceId: process.env.MCP_WORKSPACE_ID || undefined,
-};
+const TRACE_CALLER = traceCallerFromEnv();
 
 const server = new McpServer({
   name: "nasdaq-genai-gateway",
