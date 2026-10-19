@@ -1,4 +1,5 @@
 import type { ModelOption } from "@/lib/models";
+import type { Role } from "@/lib/types";
 import type {
   GatewayRequest,
   GatewayResponse,
@@ -62,10 +63,14 @@ export function createGatewayClient(options: GatewayClientOptions = {}) {
     async listTraces(params?: {
       cursor?: string;
       limit?: number;
+      role?: Role;
+      workspaceId?: string;
     }): Promise<TraceListResult> {
       const qs = new URLSearchParams();
       if (params?.cursor) qs.set("cursor", params.cursor);
       if (params?.limit) qs.set("limit", String(params.limit));
+      if (params?.role) qs.set("role", params.role);
+      if (params?.workspaceId) qs.set("workspaceId", params.workspaceId);
       const suffix = qs.toString() ? `?${qs}` : "";
 
       const res = await fetchImpl(`${baseUrl}/api/v1/traces${suffix}`, {

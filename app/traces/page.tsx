@@ -6,8 +6,9 @@ import { MockBadge } from "@/components/MockBadge";
 import { TrafficByModel } from "@/components/TrafficByModel";
 import { createGatewayClient } from "@/lib/gateway/client";
 import type { GatewayTrace } from "@/lib/gateway/contracts";
+import type { Role } from "@/lib/types";
 
-function TracesContent() {
+function TracesContent({ role }: { role: Role }) {
   const client = useMemo(() => createGatewayClient(), []);
   const [traces, setTraces] = useState<GatewayTrace[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -18,7 +19,7 @@ function TracesContent() {
   const load = useCallback(
     async (cursor?: string) => {
       try {
-        const result = await client.listTraces({ cursor, limit: 25 });
+        const result = await client.listTraces({ cursor, limit: 25, role });
         setTraces((prev) => (cursor ? [...prev, ...result.data] : result.data));
         setNextCursor(result.paging.nextCursor);
         setError(null);
@@ -26,7 +27,7 @@ function TracesContent() {
         setError(err instanceof Error ? err.message : "Failed to load traces");
       }
     },
-    [client],
+    [client, role],
   );
 
   useEffect(() => {
@@ -205,7 +206,7 @@ function TracesContent() {
 export default function TracesPage() {
   return (
     <RequireAuth allow={["admin"]}>
-      {() => <TracesContent />}
+      {(role) => <TracesContent role={role} />}
     </RequireAuth>
   );
 }

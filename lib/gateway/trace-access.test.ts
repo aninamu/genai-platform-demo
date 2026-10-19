@@ -67,6 +67,17 @@ describe("listTracesForCaller", () => {
     expect(page2.paging.nextCursor).toBeNull();
   });
 
+  it("ignores a cursor pointing at another workspace's trace", () => {
+    const caller = { role: "engineer", workspaceId: "engineering" } as const;
+    for (const cursor of ["sales-1", "support-1", "untagged-1"]) {
+      const page = listTracesForCaller(caller, { cursor, limit: 1 });
+      expect(ids(page)).toEqual(["eng-2"]);
+      expect(page.paging.nextCursor).toBe("eng-2");
+    }
+    const full = listTracesForCaller(caller, { cursor: "sales-1" });
+    expect(full.data.every((t) => t.workspaceId === "engineering")).toBe(true);
+  });
+
   it("admin sees traces from every workspace, including untagged ones", () => {
     expect(ids(listTracesForCaller({ role: "admin" }))).toEqual([
       "untagged-1",

@@ -1,10 +1,17 @@
-import { listTraces } from "@/lib/gateway";
+import { listTracesForCaller } from "@/lib/gateway";
 import { problemResponse } from "@/lib/api/problem";
+import { ALL_ROLES } from "@/lib/permissions";
+import type { Role } from "@/lib/types";
 
 export const runtime = "nodejs";
 
+function parseRole(value: string | null): Role | undefined {
+  return ALL_ROLES.find((r) => r === value);
+}
+
 // Public by design: this demo has no server-side auth (mock roles live in browser
-// localStorage), so there is no session to verify. Do not expose beyond local demos.
+// localStorage), so role and workspaceId are caller-asserted, not verified.
+// Do not expose beyond local demos.
 export async function GET(request: Request) {
   const instance = "/api/v1/traces";
   const url = new URL(request.url);
@@ -22,6 +29,12 @@ export async function GET(request: Request) {
     );
   }
 
-  const result = listTraces({ cursor, limit });
+  const result = listTracesForCaller(
+    {
+      role: parseRole(url.searchParams.get("role")),
+      workspaceId: url.searchParams.get("workspaceId") ?? undefined,
+    },
+    { cursor, limit },
+  );
   return Response.json(result);
 }

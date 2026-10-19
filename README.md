@@ -54,7 +54,7 @@ The admin **Traces** page shows traffic share (requests and %), total and averag
 Every prompt goes through `lib/gateway`:
 
 - `POST /api/v1/completions`
-- `GET /api/v1/traces?cursor=&limit=`
+- `GET /api/v1/traces?role=&workspaceId=&cursor=&limit=` (admins see all traces; other roles see only their own workspace; missing or invalid caller info returns an empty list)
 - `GET /api/v1/usage?source=all|live|sample`
 - `POST /api/v1/traces/sample` (seed sample history)
 - `GET /api/v1/models` (catalog + whether Grok is configured)
