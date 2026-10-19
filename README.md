@@ -58,7 +58,7 @@ Every prompt goes through `lib/gateway`:
 - `GET /api/v1/usage?source=all|live|sample`
 - `POST /api/v1/traces/sample` (seed sample history)
 - `GET /api/v1/models` (catalog + whether Grok is configured)
-- MCP tools via `pnpm mcp` (see `.cursor/mcp.json`). `list_traces` is scoped to the operator's `MCP_ROLE` and `MCP_WORKSPACE_ID` environment variables, not tool input; `.cursor/mcp.json` defaults them to `engineer` / `engineering`, and unset or unknown values return no traces.
+- MCP tools via `pnpm mcp` (see `.cursor/mcp.json`). `list_traces` and `usage_by_model` are scoped to the operator's `MCP_ROLE` and `MCP_WORKSPACE_ID` environment variables, not tool input; `.cursor/mcp.json` defaults them to `engineer` / `engineering`, and unset or unknown values return no traces and empty usage.
 - Typed client: `createGatewayClient()` from `lib/gateway`
 
 Traces are stored in `.data/traces.json` (gitignored).

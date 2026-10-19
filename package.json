@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "mcp": "tsx scripts/mcp-server.ts",
+    "mcp": "tsx scripts/mcp-stdio.ts",
     "seed:sample": "tsx scripts/seed-sample-traffic.ts"
   },
   "dependencies": {
