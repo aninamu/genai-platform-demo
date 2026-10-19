@@ -1,4 +1,4 @@
-import { canAccessWorkspace } from "@/lib/permissions";
+import { ALL_ROLES, canAccessWorkspace } from "@/lib/permissions";
 import { getWorkspace } from "@/lib/seed";
 import type { Role } from "@/lib/types";
 import type {
@@ -13,6 +13,19 @@ import { summarizeUsage } from "./usage";
 export interface TraceCaller {
   role?: Role;
   workspaceId?: string;
+}
+
+/**
+ * Caller for operator-launched surfaces (the MCP server), read from MCP_ROLE and
+ * MCP_WORKSPACE_ID. Unknown roles are dropped, so they fail closed.
+ */
+export function traceCallerFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): TraceCaller {
+  return {
+    role: ALL_ROLES.find((r) => r === env.MCP_ROLE),
+    workspaceId: env.MCP_WORKSPACE_ID || undefined,
+  };
 }
 
 /**

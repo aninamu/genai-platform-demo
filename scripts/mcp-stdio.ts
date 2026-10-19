@@ -4,11 +4,12 @@
  * Run: pnpm mcp
  */
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { server } from "./mcp-server";
+import { traceCallerFromEnv } from "../lib/gateway";
+import { createMcpServer } from "./mcp-server";
 
 async function main() {
   const transport = new StdioServerTransport();
-  await server.connect(transport);
+  await createMcpServer(traceCallerFromEnv()).connect(transport);
 }
 
 main().catch((err) => {
