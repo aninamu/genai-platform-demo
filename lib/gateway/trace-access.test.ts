@@ -3,7 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { GatewayTrace } from "./contracts";
-import { listTracesForCaller } from "./trace-access";
+import { getWorkspace } from "@/lib/seed";
+import { listTracesForCaller, traceCallerFromEnv } from "./trace-access";
 import { appendTrace, setTraceStorePathForTests } from "./trace-store";
 
 function trace(id: string, workspaceId?: string): GatewayTrace {
@@ -98,5 +99,35 @@ describe("listTracesForCaller", () => {
   it("returns no traces for a workspace the role cannot access or that does not exist", () => {
     expect(listTracesForCaller({ role: "engineer", workspaceId: "sales" }).data).toEqual([]);
     expect(listTracesForCaller({ role: "support", workspaceId: "unknown" }).data).toEqual([]);
+  });
+});
+
+describe("traceCallerFromEnv", () => {
+  it("reads a known role and workspace", () => {
+    expect(
+      traceCallerFromEnv({ MCP_ROLE: "engineer", MCP_WORKSPACE_ID: "engineering" }),
+    ).toEqual({ role: "engineer", workspaceId: "engineering" });
+  });
+
+  it("drops unset, empty, or unknown values so access fails closed", () => {
+    expect(traceCallerFromEnv({})).toEqual({ role: undefined, workspaceId: undefined });
+    expect(traceCallerFromEnv({ MCP_ROLE: "", MCP_WORKSPACE_ID: "" })).toEqual({
+      role: undefined,
+      workspaceId: undefined,
+    });
+    expect(traceCallerFromEnv({ MCP_ROLE: "superuser" }).role).toBeUndefined();
+    expect(traceCallerFromEnv({ MCP_ROLE: "Admin" }).role).toBeUndefined();
+  });
+
+  it("the default .cursor/mcp.json launch resolves to a caller scoped to one workspace", () => {
+    const config = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), ".cursor", "mcp.json"), "utf8"),
+    ) as { mcpServers: Record<string, { env?: Record<string, string> }> };
+    const caller = traceCallerFromEnv(config.mcpServers["nasdaq-genai-gateway"].env ?? {});
+
+    expect(caller.role).toBeDefined();
+    expect(caller.role).not.toBe("admin");
+    expect(caller.workspaceId).toBeDefined();
+    expect(getWorkspace(caller.workspaceId!)?.allowedRoles).toContain(caller.role);
   });
 });

@@ -6,10 +6,17 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { executePrompt, getUsageSummary, listTracesForCaller } from "../lib/gateway";
+import {
+  executePrompt,
+  getUsageSummary,
+  listTracesForCaller,
+  traceCallerFromEnv,
+} from "../lib/gateway";
 import { DEFAULT_MODEL_ID, MODEL_CATALOG } from "../lib/models";
-import { ALL_ROLES } from "../lib/permissions";
-import type { Role } from "../lib/types";
+
+// Trace scope comes from the operator's environment, never from tool input,
+// so MCP clients cannot self-assert a broader role.
+const TRACE_CALLER = traceCallerFromEnv();
 
 const server = new McpServer({
   name: "nasdaq-genai-gateway",
@@ -50,21 +57,13 @@ server.tool(
 
 server.tool(
   "list_traces",
-  "List gateway traces with simulated usage and cost. Admins see all workspaces; other roles see only their own workspace. Without role and workspaceId, no traces are returned.",
+  "List gateway traces with simulated usage and cost, scoped to the server operator's MCP_ROLE and MCP_WORKSPACE_ID. Admins see all workspaces; other roles see only their own workspace. Without both set, no traces are returned.",
   {
     cursor: z.string().optional(),
     limit: z.number().int().min(1).max(100).optional(),
-    role: z
-      .enum(ALL_ROLES as [Role, ...Role[]])
-      .optional()
-      .describe(`Caller role: ${ALL_ROLES.join(", ")}`),
-    workspaceId: z
-      .string()
-      .optional()
-      .describe("Caller's workspace; required for non-admin roles"),
   },
-  async ({ cursor, limit, role, workspaceId }) => {
-    const result = listTracesForCaller({ role, workspaceId }, { cursor, limit });
+  async ({ cursor, limit }) => {
+    const result = listTracesForCaller(TRACE_CALLER, { cursor, limit });
     return {
       content: [
         {
