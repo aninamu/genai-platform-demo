@@ -3,7 +3,11 @@
     "nasdaq-genai-gateway": {
       "command": "pnpm",
       "args": ["mcp"],
-      "cwd": "."
+      "cwd": ".",
+      "env": {
+        "MCP_ROLE": "engineer",
+        "MCP_WORKSPACE_ID": "engineering"
+      }
     }
   }
 }

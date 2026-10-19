@@ -54,9 +54,11 @@ export function replaceSampleTraces(samples: GatewayTrace[]): void {
 export function listTraces(options?: {
   cursor?: string | null;
   limit?: number;
+  filter?: (trace: GatewayTrace) => boolean;
 }): TraceListResult {
   const limit = Math.min(Math.max(options?.limit ?? 25, 1), 100);
-  const traces = ensureLoaded();
+  const all = ensureLoaded();
+  const traces = options?.filter ? all.filter(options.filter) : all;
   let start = 0;
 
   if (options?.cursor) {
@@ -98,18 +100,12 @@ export function setTraceStorePathForTests(filePath: string): void {
   overridePath = filePath;
 }
 
+/** Test helper: delete the overridden store file. Never touches the real `.data` store. */
 export function resetTraceStoreForTests(): void {
-  if (overridePath) {
-    try {
-      fs.rmSync(overridePath, { force: true });
-    } catch {
-      // ignore
-    }
-  } else {
-    try {
-      fs.rmSync(DEFAULT_FILE, { force: true });
-    } catch {
-      // ignore
-    }
+  if (!overridePath) return;
+  try {
+    fs.rmSync(overridePath, { force: true });
+  } catch {
+    // ignore
   }
 }

@@ -6,8 +6,17 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { executePrompt, getUsageSummary, listTraces } from "../lib/gateway";
+import {
+  executePrompt,
+  getUsageSummary,
+  listTracesForCaller,
+  traceCallerFromEnv,
+} from "../lib/gateway";
 import { DEFAULT_MODEL_ID, MODEL_CATALOG } from "../lib/models";
+
+// Trace scope comes from the operator's environment, never from tool input,
+// so MCP clients cannot self-assert a broader role.
+const TRACE_CALLER = traceCallerFromEnv();
 
 const server = new McpServer({
   name: "nasdaq-genai-gateway",
@@ -48,13 +57,13 @@ server.tool(
 
 server.tool(
   "list_traces",
-  "List gateway traces with simulated usage and cost.",
+  "List gateway traces with simulated usage and cost, scoped to the server operator's MCP_ROLE and MCP_WORKSPACE_ID. Admins see all workspaces; other roles see only their own workspace. Without both set, no traces are returned.",
   {
     cursor: z.string().optional(),
     limit: z.number().int().min(1).max(100).optional(),
   },
   async ({ cursor, limit }) => {
-    const result = listTraces({ cursor, limit });
+    const result = listTracesForCaller(TRACE_CALLER, { cursor, limit });
     return {
       content: [
         {
