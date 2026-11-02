@@ -1,5 +1,5 @@
 {
-  "name": "demo-agent",
+  "name": "mu-11-2-demo-agent",
   "private": true,
   "type": "module",
   "description": "Records a walkthrough for a GitHub pull request.",

@@ -24,7 +24,7 @@ function wake(url: string, github: GitHubHandle) {
 }
 
 export default githubChannel({
-  botName: "demo-agent",
+  botName: "mu-11-2-demo-agent",
   webhookEvents: ["pull_request", "issue_comment"],
   cursorAccount: { repos: REPOS },
   deliverReplies: false,

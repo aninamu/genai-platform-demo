@@ -1,4 +1,4 @@
-# demo-agent
+# mu-11-2-demo-agent
 
 Agent SDK project (`@grok/agent-sdk`). This file is
 for coding agents editing the project. The served agent's prompt is
